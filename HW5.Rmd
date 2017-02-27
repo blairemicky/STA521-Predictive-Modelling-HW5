@@ -1,6 +1,6 @@
 ---
-title: 'HW5: Team [my team #/name here]'
-author: '[My team member names here]'
+title: 'HW5: Team 12'
+author: 'Thomas Fleming, Blaire Li, Marc D. Ryser, Hengqian Zhang'
 date: "Due March 10, 2016"
 output:
   html_document: default
