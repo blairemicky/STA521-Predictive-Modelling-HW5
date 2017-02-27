@@ -1,0 +1,100 @@
+---
+title: 'HW5: Team [my team #/name here]'
+author: '[My team member names here]'
+date: "Due March 10, 2016"
+output:
+  html_document: default
+  html_notebook: default
+  pdf_document: default
+---
+
+
+```{r setup, warning=FALSE, echo=FALSE}
+knitr::opts_chunk$set(warning = FALSE)
+suppressMessages(library(ggplot2))
+suppressMessages(library(dplyr))
+suppressMessages(library(GGally))
+library(BAS)
+library(knitr)
+# post on piazza for additional packages if there are wercker build errors due to missing packages
+```
+
+For this assignment we will explore simulation of data to compare methods for estimation and model selection.  To get started, refer to the code from Lab6 and simulate the datasets as described there.  Some "guideposts" for when to finish parts are provided within the problem set.
+
+1.  Add to the Lab6 code a second set of 100 datasets for testing (prediction) with $25$ observations, but where the $X$'s have the same correlation matrix as in the training data.   Provide a brief description of the model that generated the data and summary of the simulation study.  (ie dimensions, true $\beta$ etc, number of simulated datasets etc.). _(Finish Monday: most code is from lab; modification fo add test data should be straightforward)_
+
+2.  Using Ordinary Least squares based on fitting the full model for each of the 100 data sets,  Compute the average RMSE for a) estimating $\beta^{true}$, b) estimating
+$\mu^{true} = X \beta^{true}$ and c) out of sample prediction for the test data from the 100 data sets. Present histograms of the RMSEs and show where the average falls.
+Note for a vector of length $d$, RMSE is defined as
+$$
+RMSE(\hat{\theta}) = \sqrt{\sum_{i = 1}^{d} (\hat{\theta}_j - \theta_j)^2/d}
+$$
+_(Finish Monday as this code from lab can be directly used/modified for this)_
+
+3.  Use AIC with either stepwise or all possible subsets to select a model and then use OLS to estimate the parameters under that model.  Using the estimates to compute the RMSE for a) estimating $\beta^{true}$, b) estimating $\mu^{true}$, and c) predicting $Y^{test}$. Present  histograms of the RMSE, and show where the  average RMSE falls on the plot.   Also report d) the number of times you select the true model using AIC out of the 100 simulations. _(A little more challenging: discuss with team  by Tuesday.  Figuring this out how to calculate RMSE with model selection will be needed for subsequent parts so start this early!.  Once this is done the  problem 5 should be easy!  Your write up should make it clear whether you used stepwise or all possible subsets)_ 
+
+4.  Take a look at the summaries from the estimates under the best AIC model from the simulation that is equal to your team number.  Create confidence intervals for the $\beta$'s and comment on whether they include zero or not or the true value.
+
+5.   Use BIC with either stepwise or all possible subsets to select a model and then use OLS to estimate the parameters under that model.  Use the estimates to compute the RMSE for a) estimating $\beta^{true}$, b) $\mu^{true}$, and c) predicting $Y^{test}$. Present  histograms of the RMSE, and show where the average RMSE falls on the plot.   Also report d) the number of times you select the true model using BIC out of the 100 simulations. 
+
+6.  Take a look at the summaries from the estimates under the best BIC model from the simulation that is equal to your team number.  Create confidence intervals for the $\beta$'s and comment on whether they include zero or not or the true value.
+
+7. Theory (work individually and then combine to add group solution, try to complete by Wednesday before class)
+For the linear model, assume that the $X$ have been centered so that they all have mean 0.  For the linear model
+$$Y \sim N(1_n \beta_0 + X \beta, I_n/\phi)
+$$
+using Zellner's $g$-prior for  $\beta$ with 
+$$\beta \mid \beta_0, \phi \sim N(0, g (X^TX)^{-1}/\phi)
+$$
+and the improper independent Jeffrey's prior $$p(\beta_0, \phi) \propto 1/\phi$$
+find the a) posterior distriubtion of $\beta \mid Y, g, \phi$, b) posterior distribution of $\mu_i = x^T_i \beta \mid Y, g, \phi$ and c) the posterior predictive distribution of $Y^{test} \mid Y, g, \phi$ as functions of the OLS/MLE summaries. _(you may use results in notes - just quote - or derive)_
+
+8. What are the corresponding distributions in 7) unconditional on $\phi$?  (hint recall theorem from class)  Are $\beta_0$ and $\beta$ still independent?  Explain.
+
+9. Let $\tau = 1/g$ and substitute that in the prior for $\beta$
+$$\beta \mid \beta_0, \phi \sim N(0, (X^TX)^{-1}/(\tau \phi))
+$$
+If $\tau \sim G(1/2, n/2)$, show that the prior on $\beta$ is a Cauchy Distribution 
+$$\beta \mid  \phi, \beta_0 \sim C(0,  (X^TX/n)^{-1}/\phi)$$
+_(a Cauchy distribution is a Student t with 1 df - see notes for density)_
+
+
+_To speed up running time for the next set of problems, do the calculations for 9-13 in one named code chunk. then use separate code chunks to provide the necessary solutions for the different parts.  Test code using one or two simulated data sets, before running on all simulated data sets.  Once you are satisfied set cache=TRUE for the code chunk._
+
+10.  Using Bayesian variable selection under the $g$-prior with $g = n$ and a uniform prior distribution over models,  find the highest posterior probability model (HPM)  using `bas.lm` from library `BAS` (or other software). (If you use `BAS`, please download `BAS` version 1.4.3 from CRAN).  Using the mean of the appropriate posterior distribution under the HPM, find the average RMSE for a) estimating $\beta^{true}$, b) estimating $\mu^{true}$ and c) predicting $Y^{test}$.  Plot histograms of the RMSE and add the average RMSE to the plots.   What proportion of the time did you select the true model?   Your answer should describe whether you used enumeration or MCMC, number of iterations or models, etc.  If you used MCMC, check diagnostic plots to examin convergence.  
+Note `BAS` has functions to compute the fitted values `fitted` and predicted values `predict` for the HPM (see the vignette or help files), however, to find the posterior mean for the beta's for a given model, we need to extract the information from the object.  The following function can be use to do this. 
+
+```{r}
+coef.HPM = function(object) {
+  best = which.max(object$postprobs)
+  model = object$which[[best]]
+  post.mean = object$mle[[best]]*object$shrinkage[best]
+  return(list(HPM = model, betahat = post.mean))
+}
+
+```
+
+ (Look at before Wednesday to be prepared to ask any questions)
+
+11.  Using the simulation that is equal to your team numbers, provide posterior summaries of the coefficient's of the HPM, such as Bayesian Confidence intervals.  
+Comment on whether the intervals contain the true value or zero.
+
+12.  To incorporate model uncertainty we could use  Bayesian Model Averaging, rather than the highest probability model. Repeat 10 and 11 using BMA for estimating the quantities.  
+
+
+13.  If we wanted to select the model that is "closest" to BMA,  we could use the model whose predictions are closest to BMA  using squared error loss.  We can find the best predictive model `BPM` from `BAS` using the predict function with `estimator="BPM"`.   Repeat 10 and 11 using the Best Predictive Model, `BPM`.
+
+
+14.  Are the Bayesian estimates sensitive to the choice of prior?  Try 10-13 using the Zellner-Siow Cauchy prior (option `prior = "ZS-null"` in `bas.lm`)  
+
+
+15.  Provide a summary of your simulation findings, with a table for the RMSEs for the different methods and parameters of interest $\beta$, $\mu$, $Y^{test}$ and proportion of time true model was selected.
+Does any one method seem to do better than the others or are some methods better for one estimation/prediction problem than the others?  Explain.
+For the energetic team - what about coverage?
+
+
+
+
+
+
+
