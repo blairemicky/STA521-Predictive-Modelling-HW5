@@ -23,6 +23,57 @@ For this assignment we will explore simulation of data to compare methods for es
 
 1.  Add to the Lab6 code a second set of 100 datasets for testing (prediction) with $25$ observations, but where the $X$'s have the same correlation matrix as in the training data.   Provide a brief description of the model that generated the data and summary of the simulation study.  (ie dimensions, true $\beta$ etc, number of simulated datasets etc.). _(Finish Monday: most code is from lab; modification fo add test data should be straightforward)_
 
+```{r}
+# true parameters
+sigma = 2.5
+betatrue = c(4,2,0,0,0,-1,0,1.5, 0,0,0,1,0,.5,0,0,0,0,-1,1,4)
+#          int|    X1                            | X2     |X3    
+
+#sample size
+n = 25
+
+# part of dataframe name
+fname=rep("df",100)
+
+# create 100 datasets
+for (i in 1:100) {
+  
+# generate some standard normals
+  Z = matrix(rnorm(n*10, 0, 1), ncol=10, nrow=n)
+  
+#  Create X1 by taking linear cominations of Z to induce correlation among X1 components
+  #multiplying first 5 columns by vector of numbers to create linear dependence
+  X1 = cbind(Z, (Z[,1:5] %*% c(.3, .5, .7, .9, 1.1) %*% t(rep(1,5)) +
+             matrix(rnorm(n*5, 0, 1), ncol=5, nrow=n)))
+# generate X2 as a standard normal  
+  #X2 independent, but correlated with X3
+  X2 <- matrix(rnorm(n*4,0,1), ncol=4, nrow=n)
+  
+# Generate X3 as a linear combination of X2 and noise  
+  X3 <- X2[,4]+rnorm(n,0,sd=0.1)
+  
+# combine them  
+  X <- cbind(X1,X2,X3)
+  
+# subtract off the column means
+  X = sweep(X, 2, apply(X,2, mean)) 
+
+# Generate mu     
+# X does not have a column of ones for the intercept so need to add the intercept  
+# for true mu  
+  mu = betatrue[1] + X %*% betatrue[-1] 
+  
+# now generate Y  
+  Y = mu + rnorm(n,0,sigma)  
+  
+# make a dataframe and save it
+  df = data.frame(Y, X, mu)
+  fname[i] = paste("df", as.character(i), sep="")
+  save(df, file=fname[i])
+}
+```
+
+
 2.  Using Ordinary Least squares based on fitting the full model for each of the 100 data sets,  Compute the average RMSE for a) estimating $\beta^{true}$, b) estimating
 $\mu^{true} = X \beta^{true}$ and c) out of sample prediction for the test data from the 100 data sets. Present histograms of the RMSEs and show where the average falls.
 Note for a vector of length $d$, RMSE is defined as
