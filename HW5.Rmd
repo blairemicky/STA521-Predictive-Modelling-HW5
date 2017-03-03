@@ -136,7 +136,7 @@ for( i in 1:100) {
   ## for beta
   RMSE.beta[i] = rmse(betatrue,coef.ols)
   ## for mu
-  RMSE.mu[i] = rmse(mu, ls[[i]]$fitted.values)
+  RMSE.mu[i] = rmse(df$mu, ls[[i]]$fitted.values)
   ## for test data
   RMSE.test.pred[i] = rmse(Y,predict(ls[[i]], data = df[51:75,]))
 #  print(c(i, MSE.OLS[i]))
@@ -184,6 +184,8 @@ RMSE_mu_aic  = rep(0,100)
 RMSE_test_aic  = rep(0,100)
 
 for(i in 1:100){
+rm(df)
+load(fname[i])
 #stepwise selection with AIC
 app_best = step(ls[[i]], k=2,trace=0)
 #create a copy of beta_like
@@ -243,6 +245,8 @@ RMSE_mu_aic  = rep(0,100)
 RMSE_test_aic  = rep(0,100)
 
 for(i in 1:100){
+rm(df)
+load(fname[i])
 #stepwise selection with BIC
 app_best = step(ls[[i]], k=log(50),trace=0)
 #create a copy of beta_like
