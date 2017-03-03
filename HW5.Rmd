@@ -23,6 +23,18 @@ For this assignment we will explore simulation of data to compare methods for es
 
 1.  Add to the Lab6 code a second set of 100 datasets for testing (prediction) with $25$ observations, but where the $X$'s have the same correlation matrix as in the training data.   Provide a brief description of the model that generated the data and summary of the simulation study.  (ie dimensions, true $\beta$ etc, number of simulated datasets etc.). _(Finish Monday: most code is from lab; modification fo add test data should be straightforward)_
 
+
+Answer:
+The true betas' we choose is the same as the betas' in lab6 which are {4.2,0,0,0,-1,0,1.5,0,0,0,1,0,0.5,0,0,0,0,-1,1,4}. We simulated 100 datasets and each with dimention 25 $\times$ 21. The procedue we use to generate the data is exact the same as we did in lab 6. Considering the training data set, we wanted to simulate 100 datasets each with dimention 75 $\times$ 23(plus Y and mu)
+For each dataset, first we generated 75 $\times$ 10 from standard normal distribution.
+
+Secondly, we picked up the last 5 columns of the data we generated in step 1 and did matrix multiplication with {0.3,0.5,0.7,0.9,1.1} to get 75$\times$ 1 vector and  replicated it 5 times to get X1 with dimention 75 $\times$ 5
+
+Thirdly, we generated 75 $\times$ 4 matrix from standard normal distribution and picked up the 4th column and added error from normal(0,0.1) to get X2 and X3 respectively.
+
+Finally, we column binded X1, X2, X3 to get desired dataset and also computed Y and mu.
+
+In addition, we can see the similar pattern in both correlation heatmap of training data and testing data. In simulation, there are 5 variables(columns) have correlation to each other. In heat map, there are ranctangles around the diagnal indicating the same patterns.
 ```{r}
 #HOW DO WE MAKE THE TEST X's HAVE THE SAME CORRELATION MATRIX AS IN THE TRAINING DATA?
 
@@ -32,7 +44,7 @@ betatrue = c(4,2,0,0,0,-1,0,1.5, 0,0,0,1,0,.5,0,0,0,0,-1,1,4)
 #          int|    X1                            | X2     |X3    
 
 #sample size
-n = 25
+n = 75
 
 # part of dataframe name
 fname=rep("df",100)
@@ -73,6 +85,14 @@ for (i in 1:100) {
   fname[i] = paste("df", as.character(i), sep="")
   save(df, file=fname[i])
 }
+
+load(fname[1])
+
+par(mfrow = c(1,2))
+#correlation map for training data 
+image(cor(df[1:50,2:22]))
+#correlation map for testing data 
+image(cor(df[51:75,2:22]))
 ```
 
 
@@ -86,6 +106,10 @@ _(Finish Monday as this code from lab can be directly used/modified for this)_
 
 ```{r}
 #REVIEW; RSME for mu probably not computed correctly; verify out-of-sample RSME was computed correctly
+rmse = function(y, ypred){
+  rmse=sqrt(mean((y-ypred)^2))
+  return(rmse)
+}
 
 RMSE.beta  = rep(0,100)
 
@@ -94,7 +118,7 @@ for( i in 1:100) {
   load(fname[i])
   nk.ols = lm(Y ~ . -mu, data=df)
   coef.ols = coef(nk.ols)
-  RMSE.beta[i] = sqrt(mean((betatrue - coef.ols)^2))
+  RMSE.beta[i] = rmse(betatrue,coef.ols)
 #  print(c(i, MSE.OLS[i]))
 }
 
