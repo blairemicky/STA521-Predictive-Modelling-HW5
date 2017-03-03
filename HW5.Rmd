@@ -41,7 +41,12 @@ In addition, we can see the similar pattern in both correlation heatmap of train
 # true parameters
 sigma = 2.5
 betatrue = c(4,2,0,0,0,-1,0,1.5, 0,0,0,1,0,.5,0,0,0,0,-1,1,4)
-#          int|    X1                            | X2     |X3    
+#          int|    X1                            | X2     |X3 
+
+names(betatrue) = c("(Intercept)","x1","x2","x3","x4","x5",
+                       "x6","x7","x8","x9","x10",
+                       "x11","x12","x13","x14","x15",
+                       "x16","x17","x18","x19","x20")
 
 #sample size
 n = 75
@@ -82,6 +87,11 @@ for (i in 1:100) {
   
 # make a dataframe and save it
   df = data.frame(Y, X, mu)
+  colnames(df) = c("Y","x1","x2","x3","x4","x5",
+                       "x6","x7","x8","x9","x10",
+                       "x11","x12","x13","x14","x15",
+                       "x16","x17","x18","x19","x20",
+                   "mu")
   fname[i] = paste("df", as.character(i), sep="")
   save(df, file=fname[i])
 }
@@ -112,43 +122,34 @@ rmse = function(y, ypred){
 }
 
 RMSE.beta  = rep(0,100)
+RMSE.mu  = rep(0,100)
+RMSE.test.pred  = rep(0,100)
+ls = vector("list",100)
 
 for( i in 1:100) {
   rm(df)
   load(fname[i])
-  nk.ols = lm(Y ~ . -mu, data=df)
-  coef.ols = coef(nk.ols)
+  
+  ls[[i]]= lm(Y ~ . -mu, data=df[1:50,])
+  
+  coef.ols = coef(ls[[i]])
+  ## for beta
   RMSE.beta[i] = rmse(betatrue,coef.ols)
+  ## for mu
+  RMSE.mu[i] = rmse(mu, ls[[i]]$fitted.values)
+  ## for test data
+  RMSE.test.pred[i] = rmse(Y,predict(ls[[i]], data = df[51:75,]))
 #  print(c(i, MSE.OLS[i]))
+  
 }
 
 #  average RMSE for estimating beta
 avg.rmse.beta = mean(RMSE.beta)
 
-RMSE.mu  = rep(0,100)
-
-for( i in 1:100) {
-  rm(df)
-  load(fname[i])
-  nk.ols = lm(Y ~ . -mu, data=df)
-  RMSE.mu[i] = sqrt(mean((mu - nk.ols$effects)^2))
-#  print(c(i, MSE.OLS[i]))
-}
-
 #  average RMSE for estimating mu
 avg.rmse.mu = mean(RMSE.mu)
 
-RMSE.test.pred  = rep(0,100)
-
-for(i in 1:100) {
-  rm(df)
-  load(fname[i])
-  nk.ols = lm(Y ~ . -mu, data=df)
-  coef.ols = coef(nk.ols)
-  RMSE.test.pred[i] = sqrt(mean((Y - predict(nk.ols))^2))
-#  print(c(i, MSE.OLS[i]))
-}
-
+# average RMSE for testing data
 avg.rmse.test = mean(RMSE.test.pred)
 
 #print average root mean squared errors
@@ -172,9 +173,114 @@ ggplot(data = rmse.df[3], aes(x = rmse.df[3])) + geom_histogram(fill = "salmon",
 
 3.  Use AIC with either stepwise or all possible subsets to select a model and then use OLS to estimate the parameters under that model.  Using the estimates to compute the RMSE for a) estimating $\beta^{true}$, b) estimating $\mu^{true}$, and c) predicting $Y^{test}$. Present  histograms of the RMSE, and show where the  average RMSE falls on the plot.   Also report d) the number of times you select the true model using AIC out of the 100 simulations. _(A little more challenging: discuss with team  by Tuesday.  Figuring this out how to calculate RMSE with model selection will be needed for subsequent parts so start this early!.  Once this is done the  problem 5 should be easy!  Your write up should make it clear whether you used stepwise or all possible subsets)_ 
 
-4.  Take a look at the summaries from the estimates under the best AIC model from the simulation that is equal to your team number.  Create confidence intervals for the $\beta$'s and comment on whether they include zero or not or the true value.
+```{r}
+#create vector with the same length and same name of betatrue
+beta_like = numeric(length(betatrue))
+names(beta_like) = names(betatrue)
 
+#initialize RMSE vector
+RMSE_beta_aic  = rep(0,100)
+RMSE_mu_aic  = rep(0,100)
+RMSE_test_aic  = rep(0,100)
+
+for(i in 1:100){
+#stepwise selection with AIC
+app_best = step(ls[[i]], k=2,trace=0)
+#create a copy of beta_like
+beta_e = beta_like
+#fill estimated beta with 0
+beta_e[names(app_best$coefficients)] = app_best$coefficients
+## for beta
+RMSE_beta_aic[i] = rmse(betatrue,beta_e)
+## for mu
+RMSE_mu_aic[i] = rmse(mu, app_best$fitted.values)
+## for testing data
+RMSE_test_aic[i] = rmse(Y,predict(app_best, data = df[51:75,]))
+}
+
+#  average RMSE for estimating beta
+avg_rmse_beta = mean(RMSE_beta_aic)
+
+#  average RMSE for estimating mu
+avg_rmse_mu = mean(RMSE_mu_aic)
+
+# average RMSE for testing data
+avg_rmse_test = mean(RMSE_test_aic)
+
+#store RSME's in data frame
+rmse_df_aic = data.frame(RMSE_beta_aic, RMSE_mu_aic, RMSE_test_aic)
+#beta
+ggplot(data = rmse_df_aic[1], aes(x = rmse_df_aic[1])) + 
+  geom_histogram(fill = "lightblue", color = "darkblue")+
+  geom_vline(xintercept = avg_rmse_beta, color = "red")
+#mu
+ggplot(data = rmse_df_aic[2], aes(x = rmse_df_aic[2])) + 
+  geom_histogram(fill = "khaki", color = "darkgoldenrod")+
+  geom_vline(xintercept = avg_rmse_mu, color = "darkblue")
+#test
+ggplot(data = rmse_df_aic[3], aes(x = rmse_df_aic[3])) + 
+  geom_histogram(fill = "salmon", color = "orangered3")+
+  geom_vline(xintercept = avg_rmse_test, color = "darkblue")
+
+```
+
+
+4.  Take a look at the summaries from the estimates under the best AIC model from the simulation that is equal to your team number.  Create confidence intervals for the $\beta$'s and comment on whether they include zero or not or the true value.
+```{r}
+
+```
 5.   Use BIC with either stepwise or all possible subsets to select a model and then use OLS to estimate the parameters under that model.  Use the estimates to compute the RMSE for a) estimating $\beta^{true}$, b) $\mu^{true}$, and c) predicting $Y^{test}$. Present  histograms of the RMSE, and show where the average RMSE falls on the plot.   Also report d) the number of times you select the true model using BIC out of the 100 simulations. 
+```{r}
+#create vector with the same length and same name of betatrue
+beta_like = numeric(length(betatrue))
+names(beta_like) = names(betatrue)
+
+#initialize RMSE vector
+RMSE_beta_aic  = rep(0,100)
+RMSE_mu_aic  = rep(0,100)
+RMSE_test_aic  = rep(0,100)
+
+for(i in 1:100){
+#stepwise selection with BIC
+app_best = step(ls[[i]], k=log(50),trace=0)
+#create a copy of beta_like
+beta_e = beta_like
+#fill estimated beta with 0
+beta_e[names(app_best$coefficients)] = app_best$coefficients
+## for beta
+RMSE_beta_aic[i] = rmse(betatrue,beta_e)
+## for mu
+RMSE_mu_aic[i] = rmse(mu, app_best$fitted.values)
+## for testing data
+RMSE_test_aic[i] = rmse(Y,predict(app_best, data = df[51:75,]))
+}
+
+#  average RMSE for estimating beta
+avg_rmse_beta = mean(RMSE_beta_aic)
+
+#  average RMSE for estimating mu
+avg_rmse_mu = mean(RMSE_mu_aic)
+
+# average RMSE for testing data
+avg_rmse_test = mean(RMSE_test_aic)
+
+#store RSME's in data frame
+rmse_df_aic = data.frame(RMSE_beta_aic, RMSE_mu_aic, RMSE_test_aic)
+#beta
+ggplot(data = rmse_df_aic[1], aes(x = rmse_df_aic[1])) + 
+  geom_histogram(fill = "lightblue", color = "darkblue")+
+  geom_vline(xintercept = avg_rmse_beta, color = "red")
+#mu
+ggplot(data = rmse_df_aic[2], aes(x = rmse_df_aic[2])) + 
+  geom_histogram(fill = "khaki", color = "darkgoldenrod")+
+  geom_vline(xintercept = avg_rmse_mu, color = "darkblue")
+#test
+ggplot(data = rmse_df_aic[3], aes(x = rmse_df_aic[3])) + 
+  geom_histogram(fill = "salmon", color = "orangered3")+
+  geom_vline(xintercept = avg_rmse_test, color = "darkblue")
+
+
+```
 
 6.  Take a look at the summaries from the estimates under the best BIC model from the simulation that is equal to your team number.  Create confidence intervals for the $\beta$'s and comment on whether they include zero or not or the true value.
 
