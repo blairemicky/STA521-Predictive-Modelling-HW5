@@ -227,7 +227,9 @@ ggplot(data = rmse_df_aic[3], aes(x = rmse_df_aic[3])) +
 
 4.  Take a look at the summaries from the estimates under the best AIC model from the simulation that is equal to your team number.  Create confidence intervals for the $\beta$'s and comment on whether they include zero or not or the true value.
 ```{r}
-
+app_best_12 = step(ls[[12]], k=2,trace=0)
+summary(app_best_12)
+confint(app_best_12)
 ```
 5.   Use BIC with either stepwise or all possible subsets to select a model and then use OLS to estimate the parameters under that model.  Use the estimates to compute the RMSE for a) estimating $\beta^{true}$, b) $\mu^{true}$, and c) predicting $Y^{test}$. Present  histograms of the RMSE, and show where the average RMSE falls on the plot.   Also report d) the number of times you select the true model using BIC out of the 100 simulations. 
 ```{r}
@@ -283,7 +285,11 @@ ggplot(data = rmse_df_aic[3], aes(x = rmse_df_aic[3])) +
 ```
 
 6.  Take a look at the summaries from the estimates under the best BIC model from the simulation that is equal to your team number.  Create confidence intervals for the $\beta$'s and comment on whether they include zero or not or the true value.
-
+```{r}
+app_best_12 = step(ls[[12]], k=log(50),trace=0)
+summary(app_best_12)
+confint(app_best_12)
+```
 7. Theory (work individually and then combine to add group solution, try to complete by Wednesday before class)
 For the linear model, assume that the $X$ have been centered so that they all have mean 0.  For the linear model
 $$Y \sim N(1_n \beta_0 + X \beta, I_n/\phi)
