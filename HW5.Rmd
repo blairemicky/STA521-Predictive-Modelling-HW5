@@ -178,11 +178,15 @@ ggplot(data = rmse.df[3], aes(x = rmse.df[3])) + geom_histogram(fill = "salmon",
 beta_like = numeric(length(betatrue))
 names(beta_like) = names(betatrue)
 
+beta_model = betatrue
+beta_model[which(beta_model!=0)] = 1
+
 #initialize RMSE vector
 RMSE_beta_aic  = rep(0,100)
 RMSE_mu_aic  = rep(0,100)
 RMSE_test_aic  = rep(0,100)
 
+count_true = 0
 for(i in 1:100){
 rm(df)
 load(fname[i])
@@ -192,6 +196,13 @@ app_best = step(ls[[i]], k=2,trace=0)
 beta_e = beta_like
 #fill estimated beta with 0
 beta_e[names(app_best$coefficients)] = app_best$coefficients
+
+coe_position = beta_like
+coe_position[names(app_best$coefficients)] = 1
+if(all(coe_position == beta_model)){
+  count_true = count_true+1
+}
+
 ## for beta
 RMSE_beta_aic[i] = rmse(betatrue,beta_e)
 ## for mu
@@ -224,6 +235,8 @@ ggplot(data = rmse_df_aic[3], aes(x = rmse_df_aic[3])) +
   geom_histogram(fill = "salmon", color = "orangered3")+
   geom_vline(xintercept = avg_rmse_test, color = "darkblue")
 
+
+count_true
 ```
 
 
@@ -239,6 +252,10 @@ confint(app_best_12)
 beta_like = numeric(length(betatrue))
 names(beta_like) = names(betatrue)
 
+
+beta_model = betatrue
+beta_model[which(beta_model!=0)] = 1
+
 #initialize RMSE vector
 RMSE_beta_aic  = rep(0,100)
 RMSE_mu_aic  = rep(0,100)
@@ -253,6 +270,14 @@ app_best = step(ls[[i]], k=log(50),trace=0)
 beta_e = beta_like
 #fill estimated beta with 0
 beta_e[names(app_best$coefficients)] = app_best$coefficients
+
+coe_position = beta_like
+coe_position[names(app_best$coefficients)] = 1
+if(all(coe_position == beta_model)){
+  count_true = count_true+1
+}
+
+
 ## for beta
 RMSE_beta_aic[i] = rmse(betatrue,beta_e)
 ## for mu
