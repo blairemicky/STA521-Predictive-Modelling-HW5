@@ -1,11 +1,11 @@
 ---
 title: 'HW5: Team 12'
-author: 'Thomas Fleming, Blaire Li, Marc D. Ryser, Hengqian Zhang'
+author: "Thomas Fleming, Blaire Li, Marc D. Ryser, Hengqian Zhang"
 date: "Due March 10, 2016"
 output:
-  html_document: default
-  html_notebook: default
   pdf_document: default
+  html_notebook: default
+  html_document: default
 ---
 
 
@@ -24,8 +24,7 @@ For this assignment we will explore simulation of data to compare methods for es
 1.  Add to the Lab6 code a second set of 100 datasets for testing (prediction) with $25$ observations, but where the $X$'s have the same correlation matrix as in the training data.   Provide a brief description of the model that generated the data and summary of the simulation study.  (ie dimensions, true $\beta$ etc, number of simulated datasets etc.). _(Finish Monday: most code is from lab; modification fo add test data should be straightforward)_
 
 ```{r}
-#HOW DO WE MAKE THE TEST X's HAVE THE SAME CORRELATION MATRIX AS IN THE TRAINING DATA?
-
+set.seed(8675309)
 # true parameters
 sigma = 2.5
 betatrue = c(4,2,0,0,0,-1,0,1.5, 0,0,0,1,0,.5,0,0,0,0,-1,1,4)
@@ -85,63 +84,47 @@ $$
 _(Finish Monday as this code from lab can be directly used/modified for this)_
 
 ```{r}
-#REVIEW; RSME for mu probably not computed correctly; verify out-of-sample RSME was computed correctly
-
 RMSE.beta  = rep(0,100)
+RMSE.mu  = rep(0,100)
+RMSE.test.pred  = rep(0,100)
 
+#Load simulation data frames and compute RMSE's
 for( i in 1:100) {
   rm(df)
   load(fname[i])
   nk.ols = lm(Y ~ . -mu, data=df)
-  coef.ols = coef(nk.ols)
-  RMSE.beta[i] = sqrt(mean((betatrue - coef.ols)^2))
-#  print(c(i, MSE.OLS[i]))
+  beta.ols = coef(nk.ols)
+  X.ols = model.matrix(Y ~ . -mu, data=df)
+  RMSE.beta[i] = sqrt(mean((betatrue - beta.ols)^2))
+  RMSE.mu[i] = sqrt(mean((mu - X.ols %*% beta.ols)^2))
+  RMSE.test.pred[i] = sqrt(mean((Y - predict(nk.ols))^2))
 }
 
 #  average RMSE for estimating beta
 avg.rmse.beta = mean(RMSE.beta)
 
-RMSE.mu  = rep(0,100)
-
-for( i in 1:100) {
-  rm(df)
-  load(fname[i])
-  nk.ols = lm(Y ~ . -mu, data=df)
-  RMSE.mu[i] = sqrt(mean((mu - nk.ols$effects)^2))
-#  print(c(i, MSE.OLS[i]))
-}
-
 #  average RMSE for estimating mu
 avg.rmse.mu = mean(RMSE.mu)
 
-RMSE.test.pred  = rep(0,100)
-
-for(i in 1:100) {
-  rm(df)
-  load(fname[i])
-  nk.ols = lm(Y ~ . -mu, data=df)
-  coef.ols = coef(nk.ols)
-  RMSE.test.pred[i] = sqrt(mean((Y - predict(nk.ols))^2))
-#  print(c(i, MSE.OLS[i]))
-}
-
+# average RMSE for test set predictions
 avg.rmse.test = mean(RMSE.test.pred)
 
-#print average root mean squared errors
-print(avg.rmse.beta)
-print(avg.rmse.mu)
-print(avg.rmse.test)
+#store average RMSE's in data frame
+avg.rmse.df = data.frame(beta = avg.rmse.beta, mu = avg.rmse.mu, test = avg.rmse.test)
+
+#Table for average RMSE's
+kable(avg.rmse.df, caption = "Average RMSE's")
 
 #store RSME's in data frame
 rmse.df = data.frame(RMSE.beta, RMSE.mu, RMSE.test.pred)
 
-#beta
+#histogram: beta
 ggplot(data = rmse.df[1], aes(x = rmse.df[1])) + geom_histogram(fill = "lightblue", color = "darkblue") + geom_vline(xintercept = avg.rmse.beta, color = "red")
 
-#mu
+#histogram: mu
 ggplot(data = rmse.df[2], aes(x = rmse.df[2])) + geom_histogram(fill = "khaki", color = "darkgoldenrod") + geom_vline(xintercept = avg.rmse.mu, color = "darkblue")
 
-#test prediction
+#histogram: test prediction
 ggplot(data = rmse.df[3], aes(x = rmse.df[3])) + geom_histogram(fill = "salmon", color = "orangered3") + geom_vline(xintercept = avg.rmse.test, color = "darkblue")
 ```
 
