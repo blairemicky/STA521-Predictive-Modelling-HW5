@@ -114,6 +114,9 @@ $$
 _(Finish Monday as this code from lab can be directly used/modified for this)_
 
 ```{r}
+a<-c(0,0,1,1.0)
+print(~a)
+
 RMSE.beta  = rep(0,100)
 RMSE.mu  = rep(0,100)
 RMSE.test.pred  = rep(0,100)
