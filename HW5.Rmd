@@ -25,14 +25,14 @@ For this assignment we will explore simulation of data to compare methods for es
 
 
 Answer:
-The true betas' we choose is the same as the betas' in lab6 which are {4.2,0,0,0,-1,0,1.5,0,0,0,1,0,0.5,0,0,0,0,-1,1,4}. We simulated 100 datasets and each with dimention 25 $\times$ 21. The procedue we use to generate the data is exact the same as we did in lab 6. Considering the training data set, we wanted to simulate 100 datasets each with dimention 75 $\times$ 23(plus Y and mu)
-For each dataset, first we generated 75 $\times$ 10 from standard normal distribution.
+The true betas' we choose is the same as the betas' in lab6 which are {4.2,0,0,0,-1,0,1.5,0,0,0,1,0,0.5,0,0,0,0,-1,1,4}. We simulated 100 datasets and each with dimension 25 $\times$ 21. The procedue we use to generate the data is exactly the same as we did in lab 6. Considering the training data set, we wanted to simulate 100 datasets each with dimension  $75 \times  23$ (21 for beta plus Y and mu)
+For each dataset, first we generated  $ 75 \times 10$ from standard normal distribution.
 
-Secondly, we picked up the last 5 columns of the data we generated in step 1 and did matrix multiplication with {0.3,0.5,0.7,0.9,1.1} to get 75$\times$ 1 vector and  replicated it 5 times to get X1 with dimention 75 $\times$ 5
+Secondly, we picked up the last 5 columns of the data we generated in step 1 and did matrix multiplication with {0.3,0.5,0.7,0.9,1.1} to get 75$\times$ 1 vector and  replicated it 5 times to get X1 with dimension 75 $\times$ 5
 
 Thirdly, we generated 75 $\times$ 4 matrix from standard normal distribution and picked up the 4th column and added error from normal(0,0.1) to get X2 and X3 respectively.
 
-Finally, we column binded X1, X2, X3 to get desired dataset and also computed Y and mu.
+Finally, we used cbind to combine X1, X2, X3 to get desired dataset and also computed Y and mu.
 
 In addition, we can see the similar pattern in both correlation heatmap of training data and testing data. In simulation, there are 5 variables(columns) have correlation to each other. In heat map, there are ranctangles around the diagnal indicating the same patterns.
 ```{r}
