@@ -254,9 +254,9 @@ beta_model = betatrue
 beta_model[which(beta_model!=0)] = 1
 
 #initialize RMSE vector
-RMSE_beta_aic  = rep(0,100)
-RMSE_mu_aic  = rep(0,100)
-RMSE_test_aic  = rep(0,100)
+RMSE_beta_bic  = rep(0,100)
+RMSE_mu_bic  = rep(0,100)
+RMSE_test_bic  = rep(0,100)
 
 for(i in 1:100){
 rm(df)
@@ -276,34 +276,34 @@ if(all(coe_position == beta_model)){
 
 
 ## for beta
-RMSE_beta_aic[i] = rmse(betatrue,beta_e)
+RMSE_beta_bic[i] = rmse(betatrue,beta_e)
 ## for mu
-RMSE_mu_aic[i] = rmse(mu, app_best$fitted.values)
+RMSE_mu_bic[i] = rmse(mu, app_best$fitted.values)
 ## for testing data
-RMSE_test_aic[i] = rmse(Y,predict(app_best, data = df[51:75,]))
+RMSE_test_bic[i] = rmse(Y,predict(app_best, data = df[51:75,]))
 }
 
 #  average RMSE for estimating beta
-avg_rmse_beta = mean(RMSE_beta_aic)
+avg_rmse_beta = mean(RMSE_beta_bic)
 
 #  average RMSE for estimating mu
-avg_rmse_mu = mean(RMSE_mu_aic)
+avg_rmse_mu = mean(RMSE_mu_bic)
 
 # average RMSE for testing data
-avg_rmse_test = mean(RMSE_test_aic)
+avg_rmse_test = mean(RMSE_test_bic)
 
 #store RSME's in data frame
-rmse_df_aic = data.frame(RMSE_beta_aic, RMSE_mu_aic, RMSE_test_aic)
+rmse_df_bic = data.frame(RMSE_beta_bic, RMSE_mu_bic, RMSE_test_bic)
 #beta
-ggplot(data = rmse_df_aic[1], aes(x = rmse_df_aic[1])) + 
+ggplot(data = rmse_df_bic[1], aes(x = rmse_df_bic[1])) + 
   geom_histogram(fill = "lightblue", color = "darkblue")+
   geom_vline(xintercept = avg_rmse_beta, color = "red")
 #mu
-ggplot(data = rmse_df_aic[2], aes(x = rmse_df_aic[2])) + 
+ggplot(data = rmse_df_bic[2], aes(x = rmse_df_bic[2])) + 
   geom_histogram(fill = "khaki", color = "darkgoldenrod")+
   geom_vline(xintercept = avg_rmse_mu, color = "darkblue")
 #test
-ggplot(data = rmse_df_aic[3], aes(x = rmse_df_aic[3])) + 
+ggplot(data = rmse_df_bic[3], aes(x = rmse_df_bic[3])) + 
   geom_histogram(fill = "salmon", color = "orangered3")+
   geom_vline(xintercept = avg_rmse_test, color = "darkblue")
 
@@ -315,13 +315,6 @@ ggplot(data = rmse_df_aic[3], aes(x = rmse_df_aic[3])) +
 app_best_12 = step(ls[[12]], k=log(50),trace=0)
 summary(app_best_12)
 confint(app_best_12)
-
-
-load(fname[1])
-aa = lm(Y ~ . -mu, data=df[1:50,])
-aa_2 = step(aa, k = 2, trace = 0)
-summary(aa)
-summary(aa_2)
 ```
 7. Theory (work individually and then combine to add group solution, try to complete by Wednesday before class)
 For the linear model, assume that the $X$ have been centered so that they all have mean 0.  For the linear model
