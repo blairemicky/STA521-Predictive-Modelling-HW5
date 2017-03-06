@@ -318,6 +318,13 @@ ggplot(data = rmse_df_aic[3], aes(x = rmse_df_aic[3])) +
 app_best_12 = step(ls[[12]], k=log(50),trace=0)
 summary(app_best_12)
 confint(app_best_12)
+
+
+load(fname[1])
+aa = lm(Y ~ . -mu, data=df[1:50,])
+aa_2 = step(aa, k = 2, trace = 0)
+summary(aa)
+summary(aa_2)
 ```
 7. Theory (work individually and then combine to add group solution, try to complete by Wednesday before class)
 For the linear model, assume that the $X$ have been centered so that they all have mean 0.  For the linear model
@@ -344,6 +351,8 @@ _To speed up running time for the next set of problems, do the calculations for 
 10.  Using Bayesian variable selection under the $g$-prior with $g = n$ and a uniform prior distribution over models,  find the highest posterior probability model (HPM)  using `bas.lm` from library `BAS` (or other software). (If you use `BAS`, please download `BAS` version 1.4.3 from CRAN).  Using the mean of the appropriate posterior distribution under the HPM, find the average RMSE for a) estimating $\beta^{true}$, b) estimating $\mu^{true}$ and c) predicting $Y^{test}$.  Plot histograms of the RMSE and add the average RMSE to the plots.   What proportion of the time did you select the true model?   Your answer should describe whether you used enumeration or MCMC, number of iterations or models, etc.  If you used MCMC, check diagnostic plots to examin convergence.  
 Note `BAS` has functions to compute the fitted values `fitted` and predicted values `predict` for the HPM (see the vignette or help files), however, to find the posterior mean for the beta's for a given model, we need to extract the information from the object.  The following function can be use to do this. 
 
+
+
 ```{r}
 coef.HPM = function(object) {
   best = which.max(object$postprobs)
@@ -352,7 +361,51 @@ coef.HPM = function(object) {
   return(list(HPM = model, betahat = post.mean))
 }
 
+
+library(BAS)
+#create vector with the same length and same name of betatrue
+beta_like = numeric(length(betatrue))
+names(beta_like) = names(betatrue)
+
+
+beta_model = betatrue
+beta_model[which(beta_model!=0)] = 1
+
+#initialize RMSE vector
+RMSE_beta_aic  = rep(0,100)
+RMSE_mu_aic  = rep(0,100)
+RMSE_test_aic  = rep(0,100)
+
+for(i in 1:100){
+rm(df)
+load(fname[i])
+#stepwise selection with BIC
+app_best = bas.lm(ls[[i]], data=df[1:50,],
+                prior="g-prior", a=nrow(df[1:50,]), modelprior=uniform(),
+                method="MCMC", MCMC.iterations = 200000, thin = 20)
+#create a copy of beta_like
+beta_e = beta_like
+#fill estimated beta with 0
+beta_e[names(app_best$coefficients)] = app_best$coefficients
+
+coe_position = beta_like
+coe_position[names(app_best$coefficients)] = 1
+if(all(coe_position == beta_model)){
+  count_true = count_true+1
+}
+
+
+## for beta
+RMSE_beta_aic[i] = rmse(betatrue,beta_e)
+## for mu
+RMSE_mu_aic[i] = rmse(mu, app_best$fitted.values)
+## for testing data
+RMSE_test_aic[i] = rmse(Y,predict(app_best, data = df[51:75,]))
+}
+
 ```
+
+
 
  (Look at before Wednesday to be prepared to ask any questions)
 
