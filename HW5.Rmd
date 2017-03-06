@@ -25,14 +25,19 @@ For this assignment we will explore simulation of data to compare methods for es
 
 
 Answer:
+<<<<<<< HEAD
 The true betas' we choose is the same as the betas' in lab6 which are {4.2,0,0,0,-1,0,1.5,0,0,0,1,0,0.5,0,0,0,0,-1,1,4}. We simulated 100 datasets and each with dimension 25 $\times$ 21. The procedue we use to generate the data is exact the same as we did in lab 6. Considering the training data set, we wanted to simulate 100 datasets each with dimention 75 $\times$ 23(plus Y and mu)
 For each dataset, first we generated 75 $\times$ 10 from standard normal distribution.
+=======
+The true betas' we choose is the same as the betas' in lab6 which are {4.2,0,0,0,-1,0,1.5,0,0,0,1,0,0.5,0,0,0,0,-1,1,4}. We simulated 100 datasets and each with dimension 25 $\times$ 21. The procedue we use to generate the data is exactly the same as we did in lab 6. Considering the training data set, we wanted to simulate 100 datasets each with dimension  $75 \times  23$ (21 for beta plus Y and mu)
+For each dataset, first we generated  $ 75 \times 10$ from standard normal distribution.
+>>>>>>> 65c50f434ebe2cf086a3292d811f6d4ef7f53d48
 
-Secondly, we picked up the last 5 columns of the data we generated in step 1 and did matrix multiplication with {0.3,0.5,0.7,0.9,1.1} to get 75$\times$ 1 vector and  replicated it 5 times to get X1 with dimention 75 $\times$ 5
+Secondly, we picked up the last 5 columns of the data we generated in step 1 and did matrix multiplication with {0.3,0.5,0.7,0.9,1.1} to get 75$\times$ 1 vector and  replicated it 5 times to get X1 with dimension 75 $\times$ 5
 
 Thirdly, we generated 75 $\times$ 4 matrix from standard normal distribution and picked up the 4th column and added error from normal(0,0.1) to get X2 and X3 respectively.
 
-Finally, we column binded X1, X2, X3 to get desired dataset and also computed Y and mu.
+Finally, we used cbind to combine X1, X2, X3 to get desired dataset and also computed Y and mu.
 
 In addition, we can see the similar pattern in both correlation heatmap of training data and testing data. In simulation, there are 5 variables(columns) have correlation to each other. In heat map, there are ranctangles around the diagnal indicating the same patterns.
 ```{r}
@@ -118,16 +123,18 @@ RMSE.beta  = rep(0,100)
 RMSE.mu  = rep(0,100)
 RMSE.test.pred  = rep(0,100)
 
+ls = vector("list",100)
+
 #Load simulation data frames and compute RMSE's
 for( i in 1:100) {
   rm(df)
   load(fname[i])
-  nk.ols = lm(Y ~ . -mu, data=df)
-  beta.ols = coef(nk.ols)
-  X.ols = model.matrix(Y ~ . -mu, data=df)
+  ls[[i]] = lm(Y ~ . -mu, data=df[1:50,])
+  beta.ols = coef(ls[[i]])
+  X.ols = model.matrix(Y ~ . -mu, data=df[1:50,])
   RMSE.beta[i] = sqrt(mean((betatrue - beta.ols)^2))
-  RMSE.mu[i] = sqrt(mean((mu - X.ols %*% beta.ols)^2))
-  RMSE.test.pred[i] = sqrt(mean((Y - predict(nk.ols))^2))
+  RMSE.mu[i] = sqrt(mean((mu[1:50,] - X.ols %*% beta.ols)^2))
+  RMSE.test.pred[i] = sqrt(mean((Y - predict(ls[[i]], newdata = df[51:75,]))^2))
 }
 
 #  average RMSE for estimating beta
@@ -162,6 +169,13 @@ ggplot(data = rmse.df[3], aes(x = rmse.df[3])) + theme_light() + labs(x = "RMSE:
 3.  Use AIC with either stepwise or all possible subsets to select a model and then use OLS to estimate the parameters under that model.  Using the estimates to compute the RMSE for a) estimating $\beta^{true}$, b) estimating $\mu^{true}$, and c) predicting $Y^{test}$. Present  histograms of the RMSE, and show where the  average RMSE falls on the plot.   Also report d) the number of times you select the true model using AIC out of the 100 simulations. _(A little more challenging: discuss with team  by Tuesday.  Figuring this out how to calculate RMSE with model selection will be needed for subsequent parts so start this early!.  Once this is done the  problem 5 should be easy!  Your write up should make it clear whether you used stepwise or all possible subsets)_ 
 
 ```{r}
+
+#rmse function
+rmse = function(y, ypred){
+  rmse=sqrt(mean((y-ypred)^2))
+  return(rmse)
+}
+
 #create vector with the same length and same name of betatrue
 beta_like = numeric(length(betatrue))
 names(beta_like) = names(betatrue)
@@ -306,6 +320,13 @@ ggplot(data = rmse_df_aic[3], aes(x = rmse_df_aic[3])) +
 app_best_12 = step(ls[[12]], k=log(50),trace=0)
 summary(app_best_12)
 confint(app_best_12)
+
+
+load(fname[1])
+aa = lm(Y ~ . -mu, data=df[1:50,])
+aa_2 = step(aa, k = 2, trace = 0)
+summary(aa)
+summary(aa_2)
 ```
 7. Theory (work individually and then combine to add group solution, try to complete by Wednesday before class)
 For the linear model, assume that the $X$ have been centered so that they all have mean 0.  For the linear model
@@ -332,6 +353,8 @@ _To speed up running time for the next set of problems, do the calculations for 
 10.  Using Bayesian variable selection under the $g$-prior with $g = n$ and a uniform prior distribution over models,  find the highest posterior probability model (HPM)  using `bas.lm` from library `BAS` (or other software). (If you use `BAS`, please download `BAS` version 1.4.3 from CRAN).  Using the mean of the appropriate posterior distribution under the HPM, find the average RMSE for a) estimating $\beta^{true}$, b) estimating $\mu^{true}$ and c) predicting $Y^{test}$.  Plot histograms of the RMSE and add the average RMSE to the plots.   What proportion of the time did you select the true model?   Your answer should describe whether you used enumeration or MCMC, number of iterations or models, etc.  If you used MCMC, check diagnostic plots to examin convergence.  
 Note `BAS` has functions to compute the fitted values `fitted` and predicted values `predict` for the HPM (see the vignette or help files), however, to find the posterior mean for the beta's for a given model, we need to extract the information from the object.  The following function can be use to do this. 
 
+
+
 ```{r}
 coef.HPM = function(object) {
   best = which.max(object$postprobs)
@@ -340,7 +363,51 @@ coef.HPM = function(object) {
   return(list(HPM = model, betahat = post.mean))
 }
 
+
+library(BAS)
+#create vector with the same length and same name of betatrue
+beta_like = numeric(length(betatrue))
+names(beta_like) = names(betatrue)
+
+
+beta_model = betatrue
+beta_model[which(beta_model!=0)] = 1
+
+#initialize RMSE vector
+RMSE_beta_aic  = rep(0,100)
+RMSE_mu_aic  = rep(0,100)
+RMSE_test_aic  = rep(0,100)
+
+for(i in 1:100){
+rm(df)
+load(fname[i])
+#stepwise selection with BIC
+app_best = bas.lm(ls[[i]], data=df[1:50,],
+                prior="g-prior", a=nrow(df[1:50,]), modelprior=uniform(),
+                method="MCMC", MCMC.iterations = 200000, thin = 20)
+#create a copy of beta_like
+beta_e = beta_like
+#fill estimated beta with 0
+beta_e[names(app_best$coefficients)] = app_best$coefficients
+
+coe_position = beta_like
+coe_position[names(app_best$coefficients)] = 1
+if(all(coe_position == beta_model)){
+  count_true = count_true+1
+}
+
+
+## for beta
+RMSE_beta_aic[i] = rmse(betatrue,beta_e)
+## for mu
+RMSE_mu_aic[i] = rmse(mu, app_best$fitted.values)
+## for testing data
+RMSE_test_aic[i] = rmse(Y,predict(app_best, data = df[51:75,]))
+}
+
 ```
+
+
 
  (Look at before Wednesday to be prepared to ask any questions)
 
