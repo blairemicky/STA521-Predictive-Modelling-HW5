@@ -118,16 +118,18 @@ RMSE.beta  = rep(0,100)
 RMSE.mu  = rep(0,100)
 RMSE.test.pred  = rep(0,100)
 
+ls = vector("list",100)
+
 #Load simulation data frames and compute RMSE's
 for( i in 1:100) {
   rm(df)
   load(fname[i])
-  nk.ols = lm(Y ~ . -mu, data=df)
-  beta.ols = coef(nk.ols)
-  X.ols = model.matrix(Y ~ . -mu, data=df)
+  ls[[i]] = lm(Y ~ . -mu, data=df[1:50,])
+  beta.ols = coef(ls[[i]])
+  X.ols = model.matrix(Y ~ . -mu, data=df[1:50,])
   RMSE.beta[i] = sqrt(mean((betatrue - beta.ols)^2))
-  RMSE.mu[i] = sqrt(mean((mu - X.ols %*% beta.ols)^2))
-  RMSE.test.pred[i] = sqrt(mean((Y - predict(nk.ols))^2))
+  RMSE.mu[i] = sqrt(mean((mu[1:50,] - X.ols %*% beta.ols)^2))
+  RMSE.test.pred[i] = sqrt(mean((Y - predict(ls[[i]], newdata = df[51:75,]))^2))
 }
 
 #  average RMSE for estimating beta
@@ -162,6 +164,13 @@ ggplot(data = rmse.df[3], aes(x = rmse.df[3])) + geom_histogram(fill = "salmon",
 3.  Use AIC with either stepwise or all possible subsets to select a model and then use OLS to estimate the parameters under that model.  Using the estimates to compute the RMSE for a) estimating $\beta^{true}$, b) estimating $\mu^{true}$, and c) predicting $Y^{test}$. Present  histograms of the RMSE, and show where the  average RMSE falls on the plot.   Also report d) the number of times you select the true model using AIC out of the 100 simulations. _(A little more challenging: discuss with team  by Tuesday.  Figuring this out how to calculate RMSE with model selection will be needed for subsequent parts so start this early!.  Once this is done the  problem 5 should be easy!  Your write up should make it clear whether you used stepwise or all possible subsets)_ 
 
 ```{r}
+
+#rmse function
+rmse = function(y, ypred){
+  rmse=sqrt(mean((y-ypred)^2))
+  return(rmse)
+}
+
 #create vector with the same length and same name of betatrue
 beta_like = numeric(length(betatrue))
 names(beta_like) = names(betatrue)
