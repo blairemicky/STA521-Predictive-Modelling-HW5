@@ -3,9 +3,9 @@ title: 'HW5: Team 12'
 author: "Thomas Fleming, Blaire Li, Marc D. Ryser, Hengqian Zhang"
 date: "Due March 10, 2016"
 output:
-  pdf_document: default
   html_notebook: default
   html_document: default
+  pdf_document: default
 ---
 
 
@@ -25,7 +25,7 @@ For this assignment we will explore simulation of data to compare methods for es
 
 
 Answer:
-The true betas' we choose is the same as the betas' in lab6 which are {4.2,0,0,0,-1,0,1.5,0,0,0,1,0,0.5,0,0,0,0,-1,1,4}. We simulated 100 datasets and each with dimention 25 $\times$ 21. The procedue we use to generate the data is exact the same as we did in lab 6. Considering the training data set, we wanted to simulate 100 datasets each with dimention 75 $\times$ 23(plus Y and mu)
+The true betas' we choose is the same as the betas' in lab6 which are {4.2,0,0,0,-1,0,1.5,0,0,0,1,0,0.5,0,0,0,0,-1,1,4}. We simulated 100 datasets and each with dimension 25 $\times$ 21. The procedue we use to generate the data is exact the same as we did in lab 6. Considering the training data set, we wanted to simulate 100 datasets each with dimention 75 $\times$ 23(plus Y and mu)
 For each dataset, first we generated 75 $\times$ 10 from standard normal distribution.
 
 Secondly, we picked up the last 5 columns of the data we generated in step 1 and did matrix multiplication with {0.3,0.5,0.7,0.9,1.1} to get 75$\times$ 1 vector and  replicated it 5 times to get X1 with dimention 75 $\times$ 5
@@ -149,13 +149,13 @@ kable(avg.rmse.df, caption = "Average RMSE's")
 rmse.df = data.frame(RMSE.beta, RMSE.mu, RMSE.test.pred)
 
 #histogram: beta
-ggplot(data = rmse.df[1], aes(x = rmse.df[1])) + geom_histogram(fill = "lightblue", color = "darkblue") + geom_vline(xintercept = avg.rmse.beta, color = "red")
+ggplot(data = rmse.df[1], aes(x = rmse.df[1])) + theme_light() + labs(x = "RSME: Beta", y = "Frequency") + geom_histogram(fill = "lightblue", color = "darkblue") + geom_vline(xintercept = avg.rmse.beta, color = "red")
 
 #histogram: mu
-ggplot(data = rmse.df[2], aes(x = rmse.df[2])) + geom_histogram(fill = "khaki", color = "darkgoldenrod") + geom_vline(xintercept = avg.rmse.mu, color = "darkblue")
+ggplot(data = rmse.df[2], aes(x = rmse.df[2])) + theme_light() + labs(x = "RMSE: Mu", y = "Frequency") + geom_histogram(fill = "khaki", color = "darkgoldenrod") + geom_vline(xintercept = avg.rmse.mu, color = "darkblue")
 
 #histogram: test prediction
-ggplot(data = rmse.df[3], aes(x = rmse.df[3])) + geom_histogram(fill = "salmon", color = "orangered3") + geom_vline(xintercept = avg.rmse.test, color = "darkblue")
+ggplot(data = rmse.df[3], aes(x = rmse.df[3])) + theme_light() + labs(x = "RMSE: Test Predictions", y = "Frequency") + geom_histogram(fill = "salmon", color = "orangered3") + geom_vline(xintercept = avg.rmse.test, color = "darkblue")
 ```
 
 
