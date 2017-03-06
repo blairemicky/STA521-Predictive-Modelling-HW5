@@ -1,11 +1,11 @@
 ---
 title: 'HW5: Team 12'
-author: 'Thomas Fleming, Blaire Li, Marc D. Ryser, Hengqian Zhang'
+author: "Thomas Fleming, Blaire Li, Marc D. Ryser, Hengqian Zhang"
 date: "Due March 10, 2016"
 output:
-  html_document: default
-  html_notebook: default
   pdf_document: default
+  html_notebook: default
+  html_document: default
 ---
 
 
@@ -25,19 +25,18 @@ For this assignment we will explore simulation of data to compare methods for es
 
 
 Answer:
-The true betas' we choose is the same as the betas' in lab6 which are {4.2,0,0,0,-1,0,1.5,0,0,0,1,0,0.5,0,0,0,0,-1,1,4}. We simulated 100 datasets and each with dimention 25 $\times$ 21. The procedue we use to generate the data is exact the same as we did in lab 6. Considering the training data set, we wanted to simulate 100 datasets each with dimention 75 $\times$ 23(plus Y and mu)
-For each dataset, first we generated 75 $\times$ 10 from standard normal distribution.
+The true betas' we choose is the same as the betas' in lab6 which are {4.2,0,0,0,-1,0,1.5,0,0,0,1,0,0.5,0,0,0,0,-1,1,4}. We simulated 100 datasets and each with dimension 25 $\times$ 21. The procedue we use to generate the data is exactly the same as we did in lab 6. Considering the training data set, we wanted to simulate 100 datasets each with dimension  $75 \times  23$ (21 for beta plus Y and mu)
+For each dataset, first we generated  $ 75 \times 10$ from standard normal distribution.
 
-Secondly, we picked up the last 5 columns of the data we generated in step 1 and did matrix multiplication with {0.3,0.5,0.7,0.9,1.1} to get 75$\times$ 1 vector and  replicated it 5 times to get X1 with dimention 75 $\times$ 5
+Secondly, we picked up the last 5 columns of the data we generated in step 1 and did matrix multiplication with {0.3,0.5,0.7,0.9,1.1} to get 75$\times$ 1 vector and  replicated it 5 times to get X1 with dimension 75 $\times$ 5
 
 Thirdly, we generated 75 $\times$ 4 matrix from standard normal distribution and picked up the 4th column and added error from normal(0,0.1) to get X2 and X3 respectively.
 
-Finally, we column binded X1, X2, X3 to get desired dataset and also computed Y and mu.
+Finally, we used cbind to combine X1, X2, X3 to get desired dataset and also computed Y and mu.
 
 In addition, we can see the similar pattern in both correlation heatmap of training data and testing data. In simulation, there are 5 variables(columns) have correlation to each other. In heat map, there are ranctangles around the diagnal indicating the same patterns.
 ```{r}
-#HOW DO WE MAKE THE TEST X's HAVE THE SAME CORRELATION MATRIX AS IN THE TRAINING DATA?
-
+set.seed(8675309)
 # true parameters
 sigma = 2.5
 betatrue = c(4,2,0,0,0,-1,0,1.5, 0,0,0,1,0,.5,0,0,0,0,-1,1,4)
@@ -115,32 +114,20 @@ $$
 _(Finish Monday as this code from lab can be directly used/modified for this)_
 
 ```{r}
-#REVIEW; RSME for mu probably not computed correctly; verify out-of-sample RSME was computed correctly
-rmse = function(y, ypred){
-  rmse=sqrt(mean((y-ypred)^2))
-  return(rmse)
-}
-
 RMSE.beta  = rep(0,100)
 RMSE.mu  = rep(0,100)
 RMSE.test.pred  = rep(0,100)
-ls = vector("list",100)
 
+#Load simulation data frames and compute RMSE's
 for( i in 1:100) {
   rm(df)
   load(fname[i])
-  
-  ls[[i]]= lm(Y ~ . -mu, data=df[1:50,])
-  
-  coef.ols = coef(ls[[i]])
-  ## for beta
-  RMSE.beta[i] = rmse(betatrue,coef.ols)
-  ## for mu
-  RMSE.mu[i] = rmse(df$mu, ls[[i]]$fitted.values)
-  ## for test data
-  RMSE.test.pred[i] = rmse(Y,predict(ls[[i]], data = df[51:75,]))
-#  print(c(i, MSE.OLS[i]))
-  
+  nk.ols = lm(Y ~ . -mu, data=df)
+  beta.ols = coef(nk.ols)
+  X.ols = model.matrix(Y ~ . -mu, data=df)
+  RMSE.beta[i] = sqrt(mean((betatrue - beta.ols)^2))
+  RMSE.mu[i] = sqrt(mean((mu - X.ols %*% beta.ols)^2))
+  RMSE.test.pred[i] = sqrt(mean((Y - predict(nk.ols))^2))
 }
 
 #  average RMSE for estimating beta
@@ -149,24 +136,25 @@ avg.rmse.beta = mean(RMSE.beta)
 #  average RMSE for estimating mu
 avg.rmse.mu = mean(RMSE.mu)
 
-# average RMSE for testing data
+# average RMSE for test set predictions
 avg.rmse.test = mean(RMSE.test.pred)
 
-#print average root mean squared errors
-print(avg.rmse.beta)
-print(avg.rmse.mu)
-print(avg.rmse.test)
+#store average RMSE's in data frame
+avg.rmse.df = data.frame(beta = avg.rmse.beta, mu = avg.rmse.mu, test = avg.rmse.test)
+
+#Table for average RMSE's
+kable(avg.rmse.df, caption = "Average RMSE's")
 
 #store RSME's in data frame
 rmse.df = data.frame(RMSE.beta, RMSE.mu, RMSE.test.pred)
 
-#beta
+#histogram: beta
 ggplot(data = rmse.df[1], aes(x = rmse.df[1])) + geom_histogram(fill = "lightblue", color = "darkblue") + geom_vline(xintercept = avg.rmse.beta, color = "red")
 
-#mu
+#histogram: mu
 ggplot(data = rmse.df[2], aes(x = rmse.df[2])) + geom_histogram(fill = "khaki", color = "darkgoldenrod") + geom_vline(xintercept = avg.rmse.mu, color = "darkblue")
 
-#test prediction
+#histogram: test prediction
 ggplot(data = rmse.df[3], aes(x = rmse.df[3])) + geom_histogram(fill = "salmon", color = "orangered3") + geom_vline(xintercept = avg.rmse.test, color = "darkblue")
 ```
 
