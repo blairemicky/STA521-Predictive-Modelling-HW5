@@ -24,14 +24,9 @@ For this assignment we will explore simulation of data to compare methods for es
 1.  Add to the Lab6 code a second set of 100 datasets for testing (prediction) with $25$ observations, but where the $X$'s have the same correlation matrix as in the training data.   Provide a brief description of the model that generated the data and summary of the simulation study.  (ie dimensions, true $\beta$ etc, number of simulated datasets etc.). _(Finish Monday: most code is from lab; modification fo add test data should be straightforward)_
 
 
-Answer:
-<<<<<<< HEAD
-The true betas' we choose is the same as the betas' in lab6 which are {4.2,0,0,0,-1,0,1.5,0,0,0,1,0,0.5,0,0,0,0,-1,1,4}. We simulated 100 datasets and each with dimension 25 $\times$ 21. The procedue we use to generate the data is exact the same as we did in lab 6. Considering the training data set, we wanted to simulate 100 datasets each with dimention 75 $\times$ 23(plus Y and mu)
-For each dataset, first we generated 75 $\times$ 10 from standard normal distribution.
-=======
-The true betas' we choose is the same as the betas' in lab6 which are {4.2,0,0,0,-1,0,1.5,0,0,0,1,0,0.5,0,0,0,0,-1,1,4}. We simulated 100 datasets and each with dimension 25 $\times$ 21. The procedue we use to generate the data is exactly the same as we did in lab 6. Considering the training data set, we wanted to simulate 100 datasets each with dimension  $75 \times  23$ (21 for beta plus Y and mu)
+ANSWER:
+The true betas' we choose is the same as the betas' in lab6 which are {4,2,0,0,0,-1,0,1.5,0,0,0,1,0,0.5,0,0,0,0,-1,1,4}. We simulated 100 datasets and each with dimension 25 $\times$ 21. The procedure we use to generate the data is exactly the same as we did in lab 6. Considering the training data set, we wanted to simulate 100 datasets each with dimension  $75 \times  23$ (21 for beta plus Y and mu)
 For each dataset, first we generated  $ 75 \times 10$ from standard normal distribution.
->>>>>>> 65c50f434ebe2cf086a3292d811f6d4ef7f53d48
 
 Secondly, we picked up the last 5 columns of the data we generated in step 1 and did matrix multiplication with {0.3,0.5,0.7,0.9,1.1} to get 75$\times$ 1 vector and  replicated it 5 times to get X1 with dimension 75 $\times$ 5
 
@@ -333,6 +328,63 @@ $$\beta \mid \beta_0, \phi \sim N(0, g (X^TX)^{-1}/\phi)
 $$
 and the improper independent Jeffrey's prior $$p(\beta_0, \phi) \propto 1/\phi$$
 find the a) posterior distriubtion of $\beta \mid Y, g, \phi$, b) posterior distribution of $\mu_i = x^T_i \beta \mid Y, g, \phi$ and c) the posterior predictive distribution of $Y^{test} \mid Y, g, \phi$ as functions of the OLS/MLE summaries. _(you may use results in notes - just quote - or derive)_
+
+ANSWER: a)
+$$ p(\beta | Y, g, \phi) \propto p(Y | \beta, g, \phi) p(\beta | g, \phi) $$
+
+Since Y is independent of g and Zellner's g-prior for $\beta$ is actually independent of $\beta_{0}$, we can plug in the given distributions for Y and $\beta$:
+
+$= N(1_{n}\beta_{0} + X\beta, I_{n}/\phi,) N(0, g(X^tX)^{-1}/\phi)$
+
+$$\propto e^{-((y - (1_{n}\beta_{0} + X\beta))^T (I_{n}/\phi)^{-1} (y - (1_{n}\beta_{0} + X\beta)))/2 } e^{- \beta^t (g(X^TX)^{-1}/\phi)^{-1} \beta/2} $$
+
+$$\propto e^{- \dfrac{1}{2\sigma^2}((y - (1_{n}\beta_{0} + X\beta))^T(y - (1_{n}\beta_{0} + X\beta))) } e^{- \dfrac{1}{2 \sigma^2} \beta^t(X^TX)/g \beta} $$
+
+$$ \propto e^{- \dfrac{1}{2 \sigma^2} (y^T y - 2\beta^TX^Ty - \beta^TX^TX\beta - 2_n\beta_{0}^Ty + 1_{n}\beta_{0}1_{n}\beta_{0} + \beta^T((X^TX)/g)\beta) } = \beta^T A \beta - 2\beta B + C $$
+
+where $$ A = \dfrac{(1 + g) X^T X}{g \sigma^2} $$, $$ B = \dfrac{X^T y}{\sigma^2} $$, and $$ c = c(y, \beta_{0}) $$
+
+Since c is not a function of $\beta$, we can leave it out of the following proportion and rewrite the above in terms of A and B as,
+
+$$ e^{- \dfrac{1}{2} (\beta^T A \beta - 2 \beta B)} $$
+
+While completing the square in this situation is tedious, we can use knowledge of the strategy for the univariate normal, outlined on page 70 of Hoff, where it is easier to calculate the posterior mean and variance. It can be shown that the formulas for the posterior mean and variance also apply to the multivariate case, and so we know that the posterior mean is equal to $$ \dfrac{A}{B} $$ and the posterior variance is equal to $$ \dfrac{1}{A} $$. If we expand these equations out, using the right-hand side of equations A and B, and simplify, we find that:
+
+
+$$Var[\beta | Y, g, \phi] = \dfrac{g}{g + 1}\sigma^2(X^tX)^{-1}$$
+
+$$E[\beta | Y, g, \phi] = \dfrac{g}{g + 1}(X^TX)^{-1}X^Ty $$
+
+
+
+b) Since the model matrix does not vary, we can find the distribution for $$ \mu_{i} = x_{i}^t\beta | Y, g, \phi $$ by taking the expected value and variance of $$ \beta | Y, g, \phi $$:
+
+$$ E[x_i\beta | Y, g, \phi] = x_iE[ \beta | Y, g, \phi]$$
+
+$$ = x_i\dfrac{g}{g + 1}(X^TX)^{-1}X^Ty $$
+
+$$ Var[x_i\beta | Y, g, \phi] = x_i^t x_i Var[\beta | Y, g, \phi]$$
+
+$$ = x_i^t x_i \dfrac{g}{g + 1} \sigma^2(X^TX)^{-1} $$
+
+*In the derivations below, the $\beta_{0}$, $\beta$, $\epsilon$, $X$, and $\sigma$ represent those associated with the test set. While we could have taken pains to label each of them "test", we have left this notation out for the sake of simplicity.
+
+c) $$ E[Y^{test} | Y, g, \phi] = E[ 1_n \beta_{0} + X\beta + \epsilon^ | Y, g, \phi]$$
+
+$$ = E[ 1_n \beta_{0} | Y, g, \phi] + E[X\beta | Y, g, \phi] + E[\epsilon^ | Y, g, \phi] $$
+
+$$ = \dfrac{1}{\phi} + x_i \dfrac{g}{1 + g} (X^TX)^{-1}X^Ty + 0$$
+
+$$ = \dfrac{1}{\phi} + x_i \dfrac{g}{1 + g} (X^TX)^{-1}X^Ty $$
+
+$$Var[Y^{test} | Y, g, \phi] =  Var[ 1_n \beta_{0} + X\beta + \epsilon^ | Y, g, \phi] $$
+
+$$ = Var[1_n \beta_{0} | Y, g, \phi] + Var[X \beta | Y, g, \phi] + Var[\epsilon^ | Y, g, \phi] $$
+
+$$ = \dfrac{1}{n \phi} + \dfrac{g}{g + 1}\sigma^2(X^TX)^{-1} + \dfrac{I_n}{\phi}$$
+
+$$ = \dfrac{1}{\phi} ( \dfrac{1}{n} + \dfrac{g}{g + 1}(X^TX)^{-1} + I_n) $$
+
 
 8. What are the corresponding distributions in 7) unconditional on $\phi$?  (hint recall theorem from class)  Are $\beta_0$ and $\beta$ still independent?  Explain.
 
