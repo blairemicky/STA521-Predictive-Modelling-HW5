@@ -444,20 +444,22 @@ RMSE_beta  = rep(0,100)
 RMSE_mu  = rep(0,100)
 RMSE_test  = rep(0,100)
 
+
+df.bas = vector("list",100)
 for(i in 1:100){
   rm(df)
   load(fname[i])
-  df.bas = bas.lm(Y ~.-mu, data=df[1:50,],
+  df.bas[[i]] = bas.lm(Y ~.-mu, data=df[1:50,],
                     prior="g-prior", a=nrow(df[1:50,]), modelprior=uniform(),
                     method="MCMC", MCMC.iterations = 200000, thin = 20)
   #get the HPM model
-  betas.bas = coef(df.bas, n.models=1)
+  betas.bas = coef(df.bas[[i]], n.models=1)
   betahat=betas.bas$postmean
    
   #the fitted values
-  muhat = fitted(df.bas, estimator="HPM")
+  muhat = fitted(df.bas[[i]], estimator="HPM")
   #the predicted values
-  pred.df = predict(df.bas, df[51:75,], estimator="HPM")
+  pred.df = predict(df.bas[[i]], df[51:75,], estimator="HPM")
   predvalues = pred.df$fit
   
   #count how many times choose the true model
@@ -504,7 +506,12 @@ ggplot(data = rmse_df_bas[3], aes(x = rmse_df_bas[3])) +
   geom_vline(xintercept = avg_rmse_test, color = "darkblue")
 count_true
 
+
+#diagnostic plots for MCMC convergence
+diagnostics(df.bas[[12]], type="pip")
+
 ```
+
 
 
 (Look at before Wednesday to be prepared to ask any questions)
@@ -512,7 +519,19 @@ count_true
 11.  Using the simulation that is equal to your team numbers, provide posterior summaries of the coefficient's of the HPM, such as Bayesian Confidence intervals.  
 Comment on whether the intervals contain the true value or zero.
 
+```{r}
+betas.bas = coef(df.bas[[12]],n.models = 1) 
+betas.bas
+confint(betas.bas)
+
+```
+
+
 12.  To incorporate model uncertainty we could use  Bayesian Model Averaging, rather than the highest probability model. Repeat 10 and 11 using BMA for estimating the quantities.  
+
+```{r}
+
+```
 
 
 13.  If we wanted to select the model that is "closest" to BMA,  we could use the model whose predictions are closest to BMA  using squared error loss.  We can find the best predictive model `BPM` from `BAS` using the predict function with `estimator="BPM"`.   Repeat 10 and 11 using the Best Predictive Model, `BPM`.
