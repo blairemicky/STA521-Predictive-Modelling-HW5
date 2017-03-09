@@ -412,6 +412,7 @@ It is easy to see that this is the kernel of a Gamma distribution with $a = \dfr
 $$ = \Gamma(\dfrac{p + 1}{2}) \Big[(\dfrac{n +(\beta^T\phi(X^TX)\beta)}{2})^{-(p+1)/2}\Big] \propto (n +(\beta^T\phi(X^TX)\beta))^{-(p+1)/2} $$
 $$ \propto \Big[1 + \dfrac{\beta^T\phi(X^TX)\beta}{n}\Big]^{-(p+1)/2}$$
 
+So, the prior on $\beta$ is proportional to a student-T with one degree of freedom, which is also a Cauchy distribution.
 
 _To speed up running time for the next set of problems, do the calculations for 9-13 in one named code chunk. then use separate code chunks to provide the necessary solutions for the different parts.  Test code using one or two simulated data sets, before running on all simulated data sets.  Once you are satisfied set cache=TRUE for the code chunk._
 
