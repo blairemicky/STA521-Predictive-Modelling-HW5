@@ -405,12 +405,12 @@ $$ = \int (2\pi)^{-p/2} \begin{vmatrix}\dfrac{(X^TX)^{-1}}{\tau \phi}\end{vmatri
 
 Grouping terms, we get:
 
-$$ \propto \int \tau^{(n + 1)/2 - 1} exp(-\dfrac{(n +(\beta^T\phi(X^TX)\beta))}{2} \tau) d\tau $$
+$$ \propto \int \tau^{(p + 1)/2 - 1} exp(-\dfrac{(n +(\beta^T\phi(X^TX)\beta))}{2} \tau) d\tau $$
 
 It is easy to see that this is the kernel of a Gamma distribution with $a = \dfrac{n + 1}{2}$ and $b = \dfrac{n + (\beta^T\phi(X^TX)\beta)}{2} $ . For this expression to be equal to 1, the proportional constant would need to be $ \dfrac{(\dfrac{n + (\beta^T\phi(X^TX)\beta)}{2})^{(n+1)/2}}{\Gamma(\dfrac{n + 1}{2})} $. It can be shown that the reciprocal of this proportional constant is what the above proportion is equal to. In mathematical terms:
 
-$$ = \Gamma(\dfrac{n + 1}{2}) \Big[(\dfrac{n +(\beta^T\phi(X^TX)\beta)}{2})^{-(n+1)/2}\Big] \propto (n +(\beta^T\phi(X^TX)\beta))^{-(n+1)/2} $$
-$$ \propto \Big[1 + \dfrac{\beta^T\phi(X^TX)\beta}{n}\Big]^{-(n+1)/2}$$
+$$ = \Gamma(\dfrac{p + 1}{2}) \Big[(\dfrac{n +(\beta^T\phi(X^TX)\beta)}{2})^{-(p+1)/2}\Big] \propto (n +(\beta^T\phi(X^TX)\beta))^{-(p+1)/2} $$
+$$ \propto \Big[1 + \dfrac{\beta^T\phi(X^TX)\beta}{n}\Big]^{-(p+1)/2}$$
 
 
 _To speed up running time for the next set of problems, do the calculations for 9-13 in one named code chunk. then use separate code chunks to provide the necessary solutions for the different parts.  Test code using one or two simulated data sets, before running on all simulated data sets.  Once you are satisfied set cache=TRUE for the code chunk._
