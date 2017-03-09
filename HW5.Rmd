@@ -388,7 +388,20 @@ $$ = \dfrac{1}{\phi} ( \dfrac{1}{n} + \dfrac{g}{g + 1}(X^TX)^{-1} + I_n) $$
 
 8. What are the corresponding distributions in 7) unconditional on $\phi$?  (hint recall theorem from class)  Are $\beta_0$ and $\beta$ still independent?  Explain.
 
+$$ p(\beta | Y, g) = \int p(\beta | Y, g, \phi) p(\phi | Y, g) d\phi $$
+$$ = \int (2\pi)^{-p/2} \begin{vmatrix}\dfrac{I_{n}}{\phi}\end{vmatrix}^{-1/2} exp(-\dfrac{(Y - (1_{n}\beta_{0} + X\beta))^T (I_{n}/\phi)^{-1} (Y - (1_{n}\beta_{0} + X\beta))}{2}) \dfrac{(\dfrac{\nu_{n}\hat{\sigma^2}}{2})}{\Gamma(\nu_{n}/2)}^{\nu_{n}/2} \phi^{\nu_{n}/2 - 1} exp(-\dfrac{\nu_{n}\hat{\sigma^2}}{2}) d\phi $$
 
+$$ \propto \int \phi^{p/2} \phi^{\nu_{n}/2 -1} exp(-\dfrac{(Y - (1_{n}\beta_{0} + X\beta))^T (Y - (1_{n}\beta_{0} + X\beta))}{2}\phi) exp(-\dfrac{\nu_{n}\hat{\sigma^2}}{2}) d\phi $$
+
+$$ \propto \int \phi^{(p+\nu_{n})/2 -1} exp(-\dfrac{(Y - (1_{n}\beta_{0} + X\beta))^T (Y - (1_{n}\beta_{0} + X\beta)) + \nu_{n}\hat{\sigma^2}}{2}\phi) d\phi $$ 
+
+This is the kernel of a gamma and we know that it is equal to the reciprocal of its proportional constant:
+
+$$  = \Gamma(\dfrac{p + \nu_{n}}{2}) \Big[\dfrac{(Y - (1_{n}\beta_{0} + X\beta))^T (Y - (1_{n}\beta_{0} + X\beta)) + \nu_{n}\hat{\sigma^2}}{2}\Big]^{-(p + \nu_{n})/2} \propto \Big[(Y - (1_{n}\beta_{0} + X\beta))^T (Y - (1_{n}\beta_{0} + X\beta)) + \nu_{n}\hat{\sigma^2}\Big]^{-(p + \nu_{n})/2} $$
+
+$$ \propto \Big[1 + \dfrac{1}{\nu_{n}}\dfrac{(Y - (1_{n}\beta_{0} + X\beta))^T (Y - (1_{n}\beta_{0} + X\beta))}{\hat{\sigma^2}}\Big]^{-(p+\nu_{n})/2} $$
+
+This is proportional to a Student-T distribution with $\nu_{n}$ degrees of freedom.
 
 9. Let $\tau = 1/g$ and substitute that in the prior for $\beta$
 $$\beta \mid \beta_0, \phi \sim N(0, (X^TX)^{-1}/(\tau \phi))
