@@ -3,9 +3,9 @@ title: 'HW5: Team 12'
 author: "Thomas Fleming, Blaire Li, Marc D. Ryser, Hengqian Zhang"
 date: "Due March 10, 2016"
 output:
-  html_notebook: default
-  html_document: default
-  pdf_document: default
+html_notebook: default
+html_document: default
+pdf_document: default
 ---
 
 
@@ -43,9 +43,9 @@ betatrue = c(4,2,0,0,0,-1,0,1.5, 0,0,0,1,0,.5,0,0,0,0,-1,1,4)
 #          int|    X1                            | X2     |X3 
 
 names(betatrue) = c("(Intercept)","x1","x2","x3","x4","x5",
-                       "x6","x7","x8","x9","x10",
-                       "x11","x12","x13","x14","x15",
-                       "x16","x17","x18","x19","x20")
+                    "x6","x7","x8","x9","x10",
+                    "x11","x12","x13","x14","x15",
+                    "x16","x17","x18","x19","x20")
 
 #sample size
 n = 75
@@ -56,40 +56,40 @@ fname=rep("df",100)
 # create 100 datasets
 for (i in 1:100) {
   
-# generate some standard normals
+  # generate some standard normals
   Z = matrix(rnorm(n*10, 0, 1), ncol=10, nrow=n)
   
-#  Create X1 by taking linear cominations of Z to induce correlation among X1 components
+  #  Create X1 by taking linear cominations of Z to induce correlation among X1 components
   #multiplying first 5 columns by vector of numbers to create linear dependence
   X1 = cbind(Z, (Z[,1:5] %*% c(.3, .5, .7, .9, 1.1) %*% t(rep(1,5)) +
-             matrix(rnorm(n*5, 0, 1), ncol=5, nrow=n)))
-# generate X2 as a standard normal  
+                   matrix(rnorm(n*5, 0, 1), ncol=5, nrow=n)))
+  # generate X2 as a standard normal  
   #X2 independent, but correlated with X3
   X2 <- matrix(rnorm(n*4,0,1), ncol=4, nrow=n)
   
-# Generate X3 as a linear combination of X2 and noise  
+  # Generate X3 as a linear combination of X2 and noise  
   X3 <- X2[,4]+rnorm(n,0,sd=0.1)
   
-# combine them  
+  # combine them  
   X <- cbind(X1,X2,X3)
   
-# subtract off the column means
+  # subtract off the column means
   X = sweep(X, 2, apply(X,2, mean)) 
-
-# Generate mu     
-# X does not have a column of ones for the intercept so need to add the intercept  
-# for true mu  
+  
+  # Generate mu     
+  # X does not have a column of ones for the intercept so need to add the intercept  
+  # for true mu  
   mu = betatrue[1] + X %*% betatrue[-1] 
   
-# now generate Y  
+  # now generate Y  
   Y = mu + rnorm(n,0,sigma)  
   
-# make a dataframe and save it
+  # make a dataframe and save it
   df = data.frame(Y, X, mu)
   colnames(df) = c("Y","x1","x2","x3","x4","x5",
-                       "x6","x7","x8","x9","x10",
-                       "x11","x12","x13","x14","x15",
-                       "x16","x17","x18","x19","x20",
+                   "x6","x7","x8","x9","x10",
+                   "x11","x12","x13","x14","x15",
+                   "x16","x17","x18","x19","x20",
                    "mu")
   fname[i] = paste("df", as.character(i), sep="")
   save(df, file=fname[i])
@@ -188,27 +188,27 @@ RMSE_test_aic  = rep(0,100)
 
 count_true = 0
 for(i in 1:100){
-rm(df)
-load(fname[i])
-#stepwise selection with AIC
-app_best = step(ls[[i]], k=2,trace=0)
-#create a copy of beta_like
-beta_e = beta_like
-#fill estimated beta with 0
-beta_e[names(app_best$coefficients)] = app_best$coefficients
-
-coe_position = beta_like
-coe_position[names(app_best$coefficients)] = 1
-if(all(coe_position == beta_model)){
-  count_true = count_true+1
-}
-
-## for beta
-RMSE_beta_aic[i] = rmse(betatrue,beta_e)
-## for mu
-RMSE_mu_aic[i] = rmse(mu, app_best$fitted.values)
-## for testing data
-RMSE_test_aic[i] = rmse(Y,predict(app_best, data = df[51:75,]))
+  rm(df)
+  load(fname[i])
+  #stepwise selection with AIC
+  app_best = step(ls[[i]], k=2,trace=0)
+  #create a copy of beta_like
+  beta_e = beta_like
+  #fill estimated beta with 0
+  beta_e[names(app_best$coefficients)] = app_best$coefficients
+  
+  coe_position = beta_like
+  coe_position[names(app_best$coefficients)] = 1
+  if(all(coe_position == beta_model)){
+    count_true = count_true+1
+  }
+  
+  ## for beta
+  RMSE_beta_aic[i] = rmse(betatrue,beta_e)
+  ## for mu
+  RMSE_mu_aic[i] = rmse(mu, app_best$fitted.values)
+  ## for testing data
+  RMSE_test_aic[i] = rmse(Y,predict(app_best, data = df[51:75,]))
 }
 
 #  average RMSE for estimating beta
@@ -262,28 +262,28 @@ RMSE_mu_bic  = rep(0,100)
 RMSE_test_bic  = rep(0,100)
 
 for(i in 1:100){
-rm(df)
-load(fname[i])
-#stepwise selection with BIC
-app_best = step(ls[[i]], k=log(50),trace=0)
-#create a copy of beta_like
-beta_e = beta_like
-#fill estimated beta with 0
-beta_e[names(app_best$coefficients)] = app_best$coefficients
-
-coe_position = beta_like
-coe_position[names(app_best$coefficients)] = 1
-if(all(coe_position == beta_model)){
-  count_true = count_true+1
-}
-
-
-## for beta
-RMSE_beta_bic[i] = rmse(betatrue,beta_e)
-## for mu
-RMSE_mu_bic[i] = rmse(mu, app_best$fitted.values)
-## for testing data
-RMSE_test_bic[i] = rmse(Y,predict(app_best, data = df[51:75,]))
+  rm(df)
+  load(fname[i])
+  #stepwise selection with BIC
+  app_best = step(ls[[i]], k=log(50),trace=0)
+  #create a copy of beta_like
+  beta_e = beta_like
+  #fill estimated beta with 0
+  beta_e[names(app_best$coefficients)] = app_best$coefficients
+  
+  coe_position = beta_like
+  coe_position[names(app_best$coefficients)] = 1
+  if(all(coe_position == beta_model)){
+    count_true = count_true+1
+  }
+  
+  
+  ## for beta
+  RMSE_beta_bic[i] = rmse(betatrue,beta_e)
+  ## for mu
+  RMSE_mu_bic[i] = rmse(mu, app_best$fitted.values)
+  ## for testing data
+  RMSE_test_bic[i] = rmse(Y,predict(app_best, data = df[51:75,]))
 }
 
 #  average RMSE for estimating beta
@@ -441,42 +441,74 @@ beta_model = betatrue
 beta_model[which(beta_model!=0)] = 1
 
 #initialize RMSE vector
-RMSE_beta_aic  = rep(0,100)
-RMSE_mu_aic  = rep(0,100)
-RMSE_test_aic  = rep(0,100)
+RMSE_beta  = rep(0,100)
+RMSE_mu  = rep(0,100)
+RMSE_test  = rep(0,100)
 
 for(i in 1:100){
-rm(df)
-load(fname[i])
-#stepwise selection with BIC
-app_best = bas.lm(ls[[i]], data=df[1:50,],
-                prior="g-prior", a=nrow(df[1:50,]), modelprior=uniform(),
-                method="MCMC", MCMC.iterations = 200000, thin = 20)
-#create a copy of beta_like
-beta_e = beta_like
-#fill estimated beta with 0
-beta_e[names(app_best$coefficients)] = app_best$coefficients
-
-coe_position = beta_like
-coe_position[names(app_best$coefficients)] = 1
-if(all(coe_position == beta_model)){
-  count_true = count_true+1
-}
-
-
-## for beta
-RMSE_beta_aic[i] = rmse(betatrue,beta_e)
-## for mu
-RMSE_mu_aic[i] = rmse(mu, app_best$fitted.values)
-## for testing data
-RMSE_test_aic[i] = rmse(Y,predict(app_best, data = df[51:75,]))
+  rm(df)
+  load(fname[i])
+  df.bas = bas.lm(Y ~.-mu, data=df[1:50,],
+                    prior="g-prior", a=nrow(df[1:50,]), modelprior=uniform(),
+                    method="MCMC", MCMC.iterations = 200000, thin = 20)
+  #get the HPM model
+  betas.bas = coef(df.bas, n.models=1)
+  betahat=betas.bas$postmean
+   
+  #the fitted values
+  muhat = fitted(df.bas, estimator="HPM")
+  #the predicted values
+  pred.df = predict(df.bas, df[51:75,], estimator="HPM")
+  predvalues = pred.df$fit
+  
+  #count how many times choose the true model
+  coe_position = beta_like
+  coe_position[which(betas.bas$postmean != 0)] = 1
+  if(all(coe_position == beta_model)){
+    count_true = count_true+1
+  }
+  
+  
+  ## for beta
+  RMSE_beta[i] = rmse(betatrue,betahat)
+  ## for mu
+  RMSE_mu[i] = rmse(mu, muhat) 
+  ## for testing data
+  RMSE_test[i] = rmse(Y,predvalues)    
 }
 
 ```
 
+```{r}
+ #  average RMSE for estimating beta
+avg_rmse_beta = mean(RMSE_beta)
+
+#  average RMSE for estimating mu
+avg_rmse_mu = mean(RMSE_mu)
+
+# average RMSE for testing data
+avg_rmse_test = mean(RMSE_test)
+
+#store RSME's in data frame
+rmse_df_bas = data.frame(RMSE_beta, RMSE_mu, RMSE_test)
+#beta
+ggplot(data = rmse_df_bas[1], aes(x = rmse_df_bas[1])) + 
+  geom_histogram(fill = "lightblue", color = "darkblue")+
+  geom_vline(xintercept = avg_rmse_beta, color = "red")
+#mu
+ggplot(data = rmse_df_bas[2], aes(x = rmse_df_bas[2])) + 
+  geom_histogram(fill = "khaki", color = "darkgoldenrod")+
+  geom_vline(xintercept = avg_rmse_mu, color = "darkblue")
+#test
+ggplot(data = rmse_df_bas[3], aes(x = rmse_df_bas[3])) + 
+  geom_histogram(fill = "salmon", color = "orangered3")+
+  geom_vline(xintercept = avg_rmse_test, color = "darkblue")
+count_true
+
+```
 
 
- (Look at before Wednesday to be prepared to ask any questions)
+(Look at before Wednesday to be prepared to ask any questions)
 
 11.  Using the simulation that is equal to your team numbers, provide posterior summaries of the coefficient's of the HPM, such as Bayesian Confidence intervals.  
 Comment on whether the intervals contain the true value or zero.
