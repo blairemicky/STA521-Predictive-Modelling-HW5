@@ -438,7 +438,7 @@ Note `BAS` has functions to compute the fitted values `fitted` and predicted val
 
 
 
-```{r}
+```{r, echo=FALSE}
 coef.HPM = function(object) {
   best = which.max(object$postprobs)
   model = object$which[[best]]
@@ -564,48 +564,32 @@ RMSE_HPM = data.frame(RMSE_beta_HPM, RMSE_mu_HPM, RMSE_test_HPM)
 RMSE_BMA = data.frame(RMSE_beta_BMA, RMSE_mu_BMA, RMSE_test_BMA)
 RMSE_BPM = data.frame(RMSE_beta_BPM, RMSE_mu_BPM, RMSE_test_BPM)
 
-
 #diagnostic plots for MCMC convergence
-diagnostics(df.bas[[12]], type="pip")
+diagnostics(app_best, type="pip")
 
 
 ```
-
-
-
-
 
 ```{r, 10_output}
-RMSE<-RMSE_HPM[1:20,]
+RMSE<-RMSE_HPM
 
 #beta
-ggplot(data = RMSE[,1], aes(x = RMSE[,1])) + 
+ggplot(data = RMSE[1], aes(x = RMSE[1])) + 
   geom_histogram(fill = "lightblue", color = "darkblue")+
-  geom_vline(xintercept = avg_rmse_beta, color = "red")
+  geom_vline(xintercept = mean(RMSE[,1]), color = "red") + labs(title="HPM: RMSE for beta ", x="RMSE", y="Count")
 #mu
-ggplot(data = rmse_df_bas[2], aes(x = rmse_df_bas[2])) + 
+ggplot(data = RMSE[2], aes(x = RMSE[2])) + 
   geom_histogram(fill = "khaki", color = "darkgoldenrod")+
-  geom_vline(xintercept = avg_rmse_mu, color = "darkblue")
+  geom_vline(xintercept = mean(RMSE[,2]), color = "darkblue")+ labs(title="HPM: RMSE for mu ", x="RMSE", y="Count")
 #test
-ggplot(data = rmse_df_bas[3], aes(x = rmse_df_bas[3])) + 
+ggplot(data = RMSE[3], aes(x = RMSE[3])) + 
   geom_histogram(fill = "salmon", color = "orangered3")+
-  geom_vline(xintercept = avg_rmse_test, color = "darkblue")
+  geom_vline(xintercept = mean(RMSE[,3]), color = "darkblue")+ labs(title="HPM: RMSE for prediction", x="RMSE", y="Count")
 count_true
+
+count_true_hpm
+
 ```
-
-#beta
-ggplot(data = rmse_df_bas[1], aes(x = rmse_df_bas[1])) + 
-  geom_histogram(fill = "lightblue", color = "darkblue")+
-  geom_vline(xintercept = avg_rmse_beta, color = "red")
-#mu
-ggplot(data = rmse_df_bas[2], aes(x = rmse_df_bas[2])) + 
-  geom_histogram(fill = "khaki", color = "darkgoldenrod")+
-  geom_vline(xintercept = avg_rmse_mu, color = "darkblue")
-#test
-ggplot(data = rmse_df_bas[3], aes(x = rmse_df_bas[3])) + 
-  geom_histogram(fill = "salmon", color = "orangered3")+
-  geom_vline(xintercept = avg_rmse_test, color = "darkblue")
-count_true
 
 
 
@@ -623,176 +607,75 @@ confint(betas.bas)
 ```
 
 
-12.  To incorporate model uncertainty we could use  Bayesian Model Averaging, rather than the highest probability model. Repeat 10 and 11 using BMA for estimating the quantities.  
-
-```{r}
-library(BAS)
-#create vector with the same length and same name of betatrue
-beta_like = numeric(length(betatrue))
-names(beta_like) = names(betatrue)
+12.  To incorporate model uncertainty we could use  Bayesian Model Averaging, rather than the highest probability model. Repeat 10 and 11 using BMA for estimating the quantities.
 
 
-beta_model = betatrue
-beta_model[which(beta_model!=0)] = 1
+```{r output12}
+RMSE<-RMSE_BMA
 
-#initialize RMSE vector
-RMSE_beta  = rep(0,100)
-RMSE_mu  = rep(0,100)
-RMSE_test  = rep(0,100)
+#beta
+ggplot(data = RMSE[1], aes(x = RMSE[1])) + 
+  geom_histogram(fill = "lightblue", color = "darkblue")+
+  geom_vline(xintercept = mean(RMSE[,1]), color = "red")+ labs(title="BMA: RMSE for beta ", x="RMSE", y="Count")
+#mu
+ggplot(data = RMSE[2], aes(x = RMSE[2])) + 
+  geom_histogram(fill = "khaki", color = "darkgoldenrod")+
+  geom_vline(xintercept = mean(RMSE[,2]), color = "darkblue")+ labs(title="BMA: RMSE for beta ", x="RMSE", y="Count")
+#test
+ggplot(data = RMSE[3], aes(x = RMSE[3])) + 
+  geom_histogram(fill = "salmon", color = "orangered3")+
+  geom_vline(xintercept = mean(RMSE[,3]), color = "darkblue")+ labs(title="BMA: RMSE for beta ", x="RMSE", y="Count")
 
 
-df.bas = vector("list",100)
-for(i in 1:100){
-  rm(df)
-  load(fname[i])
-  df.bas[[i]] = bas.lm(Y ~.-mu, data=df[1:50,],
+
+rm(df)
+load(fname[12])
+app_best_BMA12 = app_best = bas.lm(Y~.-mu, data=df[1:50,],
                     prior="g-prior", a=nrow(df[1:50,]), modelprior=uniform(),
                     method="MCMC", MCMC.iterations = 200000, thin = 20)
-  #get the BMA model
-  betas.bas = coef(df.bas[[i]])
-  betahat=betas.bas$postmean
-   
-  #the fitted values
-  muhat = fitted(df.bas[[i]], estimator="BMA")
-  #the predicted values
-  pred.df = predict(df.bas[[i]], newdata=df[51:75,], estimator="BMA")
-  predvalues = pred.df$fit
-  
-  #count how many times choose the true model
-  coe_position = beta_like
-  coe_position[which(betas.bas$postmean != 0)] = 1
-  if(all(coe_position == beta_model)){
-    count_true = count_true+1
-  }
-  
-  
-  ## for beta
-  RMSE_beta[i] = rmse(betatrue,betahat)
-  ## for mu
-  RMSE_mu[i] = rmse(mu[1:50], muhat) 
-  ## for testing data
-  RMSE_test[i] = rmse(Y[51:75],predvalues)    
-}
 
- #  average RMSE for estimating beta
-avg_rmse_beta = mean(RMSE_beta)
+print(confint.coef.bas(coef(app_best_BMA12)))
 
-#  average RMSE for estimating mu
-avg_rmse_mu = mean(RMSE_mu)
 
-# average RMSE for testing data
-avg_rmse_test = mean(RMSE_test)
-
-#store RSME's in data frame
-rmse_df_bas = data.frame(RMSE_beta, RMSE_mu, RMSE_test)
-#beta
-ggplot(data = rmse_df_bas[1], aes(x = rmse_df_bas[1])) + 
-  geom_histogram(fill = "lightblue", color = "darkblue")+
-  geom_vline(xintercept = avg_rmse_beta, color = "red")
-#mu
-ggplot(data = rmse_df_bas[2], aes(x = rmse_df_bas[2])) + 
-  geom_histogram(fill = "khaki", color = "darkgoldenrod")+
-  geom_vline(xintercept = avg_rmse_mu, color = "darkblue")
-#test
-ggplot(data = rmse_df_bas[3], aes(x = rmse_df_bas[3])) + 
-  geom_histogram(fill = "salmon", color = "orangered3")+
-  geom_vline(xintercept = avg_rmse_test, color = "darkblue")
-
-count_true
-
-#diagnostic plots for MCMC convergence
-diagnostics(df.bas[[12]], type="pip")
-
-##redo Q11
-betas.bas = coef(df.bas[[12]]) 
-betas.bas
-confint(betas.bas)
 ```
+
+
+
+
+
 13.  If we wanted to select the model that is "closest" to BMA,  we could use the model whose predictions are closest to BMA  using squared error loss.  We can find the best predictive model `BPM` from `BAS` using the predict function with `estimator="BPM"`.   Repeat 10 and 11 using the Best Predictive Model, `BPM`.
 
-```{r}
-library(BAS)
-#create vector with the same length and same name of betatrue
-beta_like = numeric(length(betatrue))
-names(beta_like) = names(betatrue)
+```{r, 13_output}
+RMSE<-RMSE_BPM
 
-
-beta_model = betatrue
-beta_model[which(beta_model!=0)] = 1
-
-#initialize RMSE vector
-RMSE_beta  = rep(0,100)
-RMSE_mu  = rep(0,100)
-RMSE_test  = rep(0,100)
-
-
-df.bas = vector("list",100)
-for(i in 1:100){
-  rm(df)
-  load(fname[i])
-  df.bas[[i]] = bas.lm(Y ~.-mu, data=df[1:50,],
-                    prior="g-prior", a=nrow(df[1:50,]), modelprior=uniform(),
-                    method="MCMC", MCMC.iterations = 200000, thin = 20)
-  #get the BPM model
-  betas.bas = coef(df.bas[[i]])
-  betahat=betas.bas$postmean
-   
-  #the fitted values
-  muhat = fitted(df.bas[[i]], estimator="BPM")
-  #the predicted values
-  pred.df = predict(df.bas[[i]], newdata=df[51:75,], estimator="BPM")
-  predvalues = pred.df$fit
-  
-  #count how many times choose the true model
-  coe_position = beta_like
-  coe_position[which(betas.bas$postmean != 0)] = 1
-  if(all(coe_position == beta_model)){
-    count_true = count_true+1
-  }
-  
-  
-  ## for beta
-  RMSE_beta[i] = rmse(betatrue,betahat)
-  ## for mu
-  RMSE_mu[i] = rmse(mu[1:50], muhat) 
-  ## for testing data
-  RMSE_test[i] = rmse(Y[51:75],predvalues)    
-}
-
- #  average RMSE for estimating beta
-avg_rmse_beta = mean(RMSE_beta)
-
-#  average RMSE for estimating mu
-avg_rmse_mu = mean(RMSE_mu)
-
-# average RMSE for testing data
-avg_rmse_test = mean(RMSE_test)
-
-#store RSME's in data frame
-rmse_df_bas = data.frame(RMSE_beta, RMSE_mu, RMSE_test)
 #beta
-ggplot(data = rmse_df_bas[1], aes(x = rmse_df_bas[1])) + 
+ggplot(data = RMSE[1], aes(x = RMSE[1])) + 
   geom_histogram(fill = "lightblue", color = "darkblue")+
-  geom_vline(xintercept = avg_rmse_beta, color = "red")
+  geom_vline(xintercept = mean(RMSE[,1]), color = "red")+ labs(title="BPM: RMSE for beta ", x="RMSE", y="Count")
 #mu
-ggplot(data = rmse_df_bas[2], aes(x = rmse_df_bas[2])) + 
+ggplot(data = RMSE[2], aes(x = RMSE[2])) + 
   geom_histogram(fill = "khaki", color = "darkgoldenrod")+
-  geom_vline(xintercept = avg_rmse_mu, color = "darkblue")
+  geom_vline(xintercept = mean(RMSE[,2]), color = "darkblue")+ labs(title="BPM: RMSE for beta ", x="RMSE", y="Count")
 #test
-ggplot(data = rmse_df_bas[3], aes(x = rmse_df_bas[3])) + 
+ggplot(data = RMSE[3], aes(x = RMSE[3])) + 
   geom_histogram(fill = "salmon", color = "orangered3")+
-  geom_vline(xintercept = avg_rmse_test, color = "darkblue")
-
+  geom_vline(xintercept = mean(RMSE[,3]), color = "darkblue")+ labs(title="BPM: RMSE for beta ", x="RMSE", y="Count")
 count_true
 
-#diagnostic plots for MCMC convergence
-diagnostics(df.bas[[12]], type="pip")
 
-##redo Q11
-betas.bas = coef(df.bas[[12]]) 
-betas.bas
-confint(betas.bas)
+rm(df)
+load(fname[12])
+app_best_BMA12 = app_best = bas.lm(Y~.-mu, data=df[1:50,],
+                    prior="g-prior", a=nrow(df[1:50,]), modelprior=uniform(),
+                    method="MCMC", MCMC.iterations = 200000, thin = 20)
+
+
+
+count_true_bpm
 ```
+
+
+
 
 
 14.  Are the Bayesian estimates sensitive to the choice of prior?  Try 10-13 using the Zellner-Siow Cauchy prior (option `prior = "ZS-null"` in `bas.lm`)  
