@@ -405,15 +405,14 @@ $$ = \int (2\pi)^{-p/2} \begin{vmatrix}\dfrac{(X^TX)^{-1}}{\tau \phi}\end{vmatri
 
 Grouping terms, we get:
 
-$$ = \dfrac{(2\pi)^{-p/2} \dfrac{n}{2}^{1/2} \phi^{n/2 - 1}} {\Gamma(\dfrac{1}{2})} \begin{vmatrix} (X^TX)^{-1} \end{vmatrix}^{-1/2} \int \tau^{(n + 1)/2 - 1} exp(-\dfrac{n(\beta^T\phi(X^TX)\beta)}{2} \tau) d\tau $$
+$$ \propto \int \tau^{(p + 1)/2 - 1} exp(-\dfrac{(n +(\beta^T\phi(X^TX)\beta))}{2} \tau) d\tau $$
 
-It is easy to see that the kernel is that of a Gamma distribution with $a = \dfrac{n + 1}{2}$ and $b = \dfrac{n(\beta^T\phi(X^TX)\beta)}{2} $ . However, the proportional constant is not the same as a Gamma distribution and so this can not, as of yet, integrate to 1. For this expression to be equal to 1, the proportional constant would need to be $ \dfrac{(\dfrac{n(\beta^T\phi(X^TX)\beta)}{2})^{(n+1)/2}}{\Gamma(\dfrac{n + 1}{2})} $. 
+It is easy to see that this is the kernel of a Gamma distribution with $a = \dfrac{n + 1}{2}$ and $b = \dfrac{n + (\beta^T\phi(X^TX)\beta)}{2} $ . For this expression to be equal to 1, the proportional constant would need to be $ \dfrac{(\dfrac{n + (\beta^T\phi(X^TX)\beta)}{2})^{(n+1)/2}}{\Gamma(\dfrac{n + 1}{2})} $. It can be shown that the reciprocal of this proportional constant is what the above proportion is equal to. In mathematical terms:
 
-We can figure out what the expression above is equal to though. By getting rid of most of the proportional constant above (except for the $\pi$), thinking of what we would need to multiply both sides by for it to be equal to 1, and then taking the reciprocal of that quantity, we find what our Gamma kernel and proportional constant is now equal to. This reciprocal is shown below.
+$$ = \Gamma(\dfrac{p + 1}{2}) \Big[(\dfrac{n +(\beta^T\phi(X^TX)\beta)}{2})^{-(p+1)/2}\Big] \propto (n +(\beta^T\phi(X^TX)\beta))^{-(p+1)/2} $$
+$$ \propto \Big[1 + \dfrac{\beta^T\phi(X^TX)\beta}{n}\Big]^{-(p+1)/2}$$
 
-$$ \propto \dfrac{\Gamma(\dfrac{n + 1}{2})}{\pi\Big[(\dfrac{n(\beta^T\phi(X^TX)\beta)}{2})^{(n+1)/2}\Big]} \propto \dfrac{1}{\pi\Big[(\dfrac{\beta^T\beta}{(X^TX/n)^{-1}/\phi})^{(n+1)/2}\Big]}  $$
-#COULDN'T FIGURE OUT HOW TO MASSAGE IT INTO CAUCHY FORM; STILL IN PROGRESS - Tom
-
+So, the prior on $\beta$ is proportional to a student-T with one degree of freedom, which is also a Cauchy distribution.
 
 _To speed up running time for the next set of problems, do the calculations for 9-13 in one named code chunk. then use separate code chunks to provide the necessary solutions for the different parts.  Test code using one or two simulated data sets, before running on all simulated data sets.  Once you are satisfied set cache=TRUE for the code chunk._
 
