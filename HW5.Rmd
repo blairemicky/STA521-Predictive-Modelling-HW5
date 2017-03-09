@@ -446,69 +446,153 @@ coef.HPM = function(object) {
   return(list(HPM = model, betahat = post.mean))
 }
 
+coef.BPM = function(object) {
+  yy = predict(object, estimator="BPM")
+  model = object$which[[yy$best]]
+  post.mean = object$mle[[yy$best]]*object$shrinkage[yy$best]
+  return(list(HPM = model, betahat = post.mean))
+}
+
+
+#################################
+### Chunk for Problems 10 and 12
+#################################
 
 library(BAS)
 #create vector with the same length and same name of betatrue
 beta_like = numeric(length(betatrue))
 names(beta_like) = names(betatrue)
 
+count_true_hpm<-0
+count_true_bpm<-0
 
-beta_model = betatrue
-beta_model[which(beta_model!=0)] = 1
+beta_model[which(betatrue!=0)] = 1
 
-#initialize RMSE vector
-RMSE_beta  = rep(0,100)
-RMSE_mu  = rep(0,100)
-RMSE_test  = rep(0,100)
+#initialize RMSE vector for HPM
+RMSE_beta_HPM  = rep(0,100)
+RMSE_mu_HPM  = rep(0,100)
+RMSE_test_HPM  = rep(0,100)
 
+#initialize RMSE vector for BMA
+RMSE_beta_BMA = rep(0,100)
+RMSE_mu_BMA  = rep(0,100)
+RMSE_test_BMA  = rep(0,100)
 
-df.bas = vector("list",100)
+#initialize RMSE vector for BPM
+RMSE_beta_BPM = rep(0,100)
+RMSE_mu_BPM  = rep(0,100)
+RMSE_test_BPM  = rep(0,100)
+
 for(i in 1:100){
   rm(df)
   load(fname[i])
-  df.bas[[i]] = bas.lm(Y ~.-mu, data=df[1:50,],
+  # Use BAS for model sampling (method=MCMC for speed; method=BAS for enumeration)
+  app_best = bas.lm(Y~.-mu, data=df[1:50,],
                     prior="g-prior", a=nrow(df[1:50,]), modelprior=uniform(),
                     method="MCMC", MCMC.iterations = 200000, thin = 20)
-  #get the HPM model
-  betas.bas = coef(df.bas[[i]], n.models=1)
-  betahat=betas.bas$postmean
-   
-  #the fitted values
-  muhat = fitted(df.bas[[i]], estimator="HPM")
-  #the predicted values
-  pred.df = predict(df.bas[[i]], newdata=df[51:75,], estimator="HPM")
-  predvalues = pred.df$fit
   
-  #count how many times choose the true model
-  coe_position = beta_like
-  coe_position[which(betas.bas$postmean != 0)] = 1
+  ###############################################
+  ## Work out the coefficients for the HPM ######
+  # create a copy of beta_like
+  beta_hpm = beta_like
+  # call the function coef.HPM to compute the betahat's for the HPM
+  hpm_summary<-coef.HPM(app_best)
+  # create beta_hpm of length(betatrue) with zeros for left out predictors
+  beta_hpm[hpm_summary$HPM+1] = hpm_summary$betahat
+  
+  # Check if the HPM is identical with the true model in terms of variable selection
+  coe_position = (beta_hpm!=0)*1
   if(all(coe_position == beta_model)){
-    count_true = count_true+1
+    count_true_hpm = count_true_hpm+1
   }
   
+  ###############################################
+  ## Work out the coefficients for the BPM ######
+  # create a copy of beta_like
+  beta_bpm = beta_like
+  # call the function coef.HPM to compute the betahat's for the HPM
+  bpm_summary<-coef.BPM(app_best)
+  # create beta_hpm of length(betatrue) with zeros for left out predictors
+  beta_bpm[bpm_summary$HPM+1] = bpm_summary$betahat
   
-  ## for beta
-  RMSE_beta[i] = rmse(betatrue,betahat)
-  ## for mu
-  RMSE_mu[i] = rmse(mu[1:50], muhat) 
-  ## for testing data
-  RMSE_test[i] = rmse(Y[51:75],predvalues)    
+  # Check if the HPM is identical with the true model in terms of variable selection
+  coe_position = (beta_bpm!=0)*1
+  if(all(coe_position == beta_model)){
+    count_true_bpm = count_true_bpm+1
+  }
+  
+  ###############################################
+  ## UPDATE THE RMSE VECTORS        ######
+  
+  ## HPM: RMSE for beta_true (fitting)
+  RMSE_beta_HPM[i] = rmse(betatrue,beta_hpm)
+  ## HPM: RMSE for mu_true (fitting)
+  mu_fit<-fitted(app_best, estimator = "HPM")
+  RMSE_mu_HPM[i] = rmse(mu[1:50], mu_fit)
+  ## HPM: RMSE for Y_true (prediction on test data)
+  y_pred<-predict.bas(app_best,newdata=df[51:75,], estimator="HPM", prediction=TRUE)
+  RMSE_test_HPM[i] = rmse(Y[50:75],y_pred$fit)
+  
+  ## BMA: RMSE for beta_true (fitting)
+  RMSE_beta_BMA[i] = rmse(betatrue,coef(app_best)$postmean)
+  ## BMA: RMSE for mu_true (fitting)
+  mu_fit<-fitted(app_best, estimator = "BMA")
+  RMSE_mu_BMA[i] = rmse(mu[1:50], mu_fit)
+  ## BMA: RMSE for Y_true (prediction on test data)
+  y_pred<-predict.bas(app_best,newdata=df[51:75,], estimator="BMA", prediction=TRUE)
+  RMSE_test_BMA[i] = rmse(Y[51:75],y_pred$fit)
+  
+  ## BPM: RMSE for beta_true (fitting)
+  RMSE_beta_BPM[i] = rmse(betatrue,beta_bpm)
+  ## BPM: RMSE for mu_true (fitting)
+  mu_fit<-fitted(app_best, estimator = "BPM")
+  RMSE_mu_BPM[i] = rmse(mu[1:50], mu_fit)
+  ## BPM: RMSE for Y_true (prediction on test data)
+  y_pred<-predict.bas(app_best,newdata=df[51:75,], estimator="BPM", prediction=TRUE)
+  RMSE_test_BPM[i] = rmse(Y[51:75],y_pred$fit)
+  
+  
+  print(i)
 }
+
+
+# Prepare for outputs
+
+
+#store RSME's in data frame
+RMSE_HPM = data.frame(RMSE_beta_HPM, RMSE_mu_HPM, RMSE_test_HPM)
+RMSE_BMA = data.frame(RMSE_beta_BMA, RMSE_mu_BMA, RMSE_test_BMA)
+RMSE_BPM = data.frame(RMSE_beta_BPM, RMSE_mu_BPM, RMSE_test_BPM)
+
+
+#diagnostic plots for MCMC convergence
+diagnostics(df.bas[[12]], type="pip")
+
 
 ```
 
-```{r}
- #  average RMSE for estimating beta
-avg_rmse_beta = mean(RMSE_beta)
 
-#  average RMSE for estimating mu
-avg_rmse_mu = mean(RMSE_mu)
 
-# average RMSE for testing data
-avg_rmse_test = mean(RMSE_test)
 
-#store RSME's in data frame
-rmse_df_bas = data.frame(RMSE_beta, RMSE_mu, RMSE_test)
+
+```{r, 10_output}
+RMSE<-RMSE_HPM[1:20,]
+
+#beta
+ggplot(data = RMSE[,1], aes(x = RMSE[,1])) + 
+  geom_histogram(fill = "lightblue", color = "darkblue")+
+  geom_vline(xintercept = avg_rmse_beta, color = "red")
+#mu
+ggplot(data = rmse_df_bas[2], aes(x = rmse_df_bas[2])) + 
+  geom_histogram(fill = "khaki", color = "darkgoldenrod")+
+  geom_vline(xintercept = avg_rmse_mu, color = "darkblue")
+#test
+ggplot(data = rmse_df_bas[3], aes(x = rmse_df_bas[3])) + 
+  geom_histogram(fill = "salmon", color = "orangered3")+
+  geom_vline(xintercept = avg_rmse_test, color = "darkblue")
+count_true
+```
+
 #beta
 ggplot(data = rmse_df_bas[1], aes(x = rmse_df_bas[1])) + 
   geom_histogram(fill = "lightblue", color = "darkblue")+
@@ -523,11 +607,6 @@ ggplot(data = rmse_df_bas[3], aes(x = rmse_df_bas[3])) +
   geom_vline(xintercept = avg_rmse_test, color = "darkblue")
 count_true
 
-
-#diagnostic plots for MCMC convergence
-diagnostics(df.bas[[12]], type="pip")
-
-```
 
 
 
