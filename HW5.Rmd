@@ -132,7 +132,7 @@ for( i in 1:100) {
   X.ols = model.matrix(Y ~ . -mu, data=df[1:50,])
   RMSE.beta[i] = sqrt(mean((betatrue - beta.ols)^2))
   RMSE.mu[i] = sqrt(mean((mu[1:50,] - X.ols %*% beta.ols)^2))
-  RMSE.test.pred[i] = sqrt(mean((Y - predict(ls[[i]], newdata = df[51:75,]))^2))
+  RMSE.test.pred[i] = sqrt(mean((Y[51:75] - predict(ls[[i]], newdata = df[51:75,]))^2))
 }
 
 #  average RMSE for estimating beta
@@ -206,9 +206,9 @@ for(i in 1:100){
   ## for beta
   RMSE_beta_aic[i] = rmse(betatrue,beta_e)
   ## for mu
-  RMSE_mu_aic[i] = rmse(mu, app_best$fitted.values)
+  RMSE_mu_aic[i] = rmse(mu[1:50], app_best$fitted.values)
   ## for testing data
-  RMSE_test_aic[i] = rmse(Y,predict(app_best, data = df[51:75,]))
+  RMSE_test_aic[i] = rmse(Y[51:75],predict(app_best, newdata = df[51:75,]))
 }
 
 #  average RMSE for estimating beta
@@ -281,9 +281,9 @@ for(i in 1:100){
   ## for beta
   RMSE_beta_bic[i] = rmse(betatrue,beta_e)
   ## for mu
-  RMSE_mu_bic[i] = rmse(mu, app_best$fitted.values)
+  RMSE_mu_bic[i] = rmse(mu[1:50], app_best$fitted.values)
   ## for testing data
-  RMSE_test_bic[i] = rmse(Y,predict(app_best, data = df[51:75,]))
+  RMSE_test_bic[i] = rmse(Y[51:75],predict(app_best, newdata = df[51:75,]))
 }
 
 #  average RMSE for estimating beta
@@ -459,7 +459,7 @@ for(i in 1:100){
   #the fitted values
   muhat = fitted(df.bas[[i]], estimator="HPM")
   #the predicted values
-  pred.df = predict(df.bas[[i]], df[51:75,], estimator="HPM")
+  pred.df = predict(df.bas[[i]], newdata=df[51:75,], estimator="HPM")
   predvalues = pred.df$fit
   
   #count how many times choose the true model
@@ -473,9 +473,9 @@ for(i in 1:100){
   ## for beta
   RMSE_beta[i] = rmse(betatrue,betahat)
   ## for mu
-  RMSE_mu[i] = rmse(mu, muhat) 
+  RMSE_mu[i] = rmse(mu[1:50], muhat) 
   ## for testing data
-  RMSE_test[i] = rmse(Y,predvalues)    
+  RMSE_test[i] = rmse(Y[51:75],predvalues)    
 }
 
 ```
@@ -530,15 +530,410 @@ confint(betas.bas)
 12.  To incorporate model uncertainty we could use  Bayesian Model Averaging, rather than the highest probability model. Repeat 10 and 11 using BMA for estimating the quantities.  
 
 ```{r}
+library(BAS)
+#create vector with the same length and same name of betatrue
+beta_like = numeric(length(betatrue))
+names(beta_like) = names(betatrue)
 
+
+beta_model = betatrue
+beta_model[which(beta_model!=0)] = 1
+
+#initialize RMSE vector
+RMSE_beta  = rep(0,100)
+RMSE_mu  = rep(0,100)
+RMSE_test  = rep(0,100)
+
+
+df.bas = vector("list",100)
+for(i in 1:100){
+  rm(df)
+  load(fname[i])
+  df.bas[[i]] = bas.lm(Y ~.-mu, data=df[1:50,],
+                    prior="g-prior", a=nrow(df[1:50,]), modelprior=uniform(),
+                    method="MCMC", MCMC.iterations = 200000, thin = 20)
+  #get the BMA model
+  betas.bas = coef(df.bas[[i]])
+  betahat=betas.bas$postmean
+   
+  #the fitted values
+  muhat = fitted(df.bas[[i]], estimator="BMA")
+  #the predicted values
+  pred.df = predict(df.bas[[i]], newdata=df[51:75,], estimator="BMA")
+  predvalues = pred.df$fit
+  
+  #count how many times choose the true model
+  coe_position = beta_like
+  coe_position[which(betas.bas$postmean != 0)] = 1
+  if(all(coe_position == beta_model)){
+    count_true = count_true+1
+  }
+  
+  
+  ## for beta
+  RMSE_beta[i] = rmse(betatrue,betahat)
+  ## for mu
+  RMSE_mu[i] = rmse(mu[1:50], muhat) 
+  ## for testing data
+  RMSE_test[i] = rmse(Y[51:75],predvalues)    
+}
+
+ #  average RMSE for estimating beta
+avg_rmse_beta = mean(RMSE_beta)
+
+#  average RMSE for estimating mu
+avg_rmse_mu = mean(RMSE_mu)
+
+# average RMSE for testing data
+avg_rmse_test = mean(RMSE_test)
+
+#store RSME's in data frame
+rmse_df_bas = data.frame(RMSE_beta, RMSE_mu, RMSE_test)
+#beta
+ggplot(data = rmse_df_bas[1], aes(x = rmse_df_bas[1])) + 
+  geom_histogram(fill = "lightblue", color = "darkblue")+
+  geom_vline(xintercept = avg_rmse_beta, color = "red")
+#mu
+ggplot(data = rmse_df_bas[2], aes(x = rmse_df_bas[2])) + 
+  geom_histogram(fill = "khaki", color = "darkgoldenrod")+
+  geom_vline(xintercept = avg_rmse_mu, color = "darkblue")
+#test
+ggplot(data = rmse_df_bas[3], aes(x = rmse_df_bas[3])) + 
+  geom_histogram(fill = "salmon", color = "orangered3")+
+  geom_vline(xintercept = avg_rmse_test, color = "darkblue")
+
+count_true
+
+#diagnostic plots for MCMC convergence
+diagnostics(df.bas[[12]], type="pip")
+
+##redo Q11
+betas.bas = coef(df.bas[[12]]) 
+betas.bas
+confint(betas.bas)
 ```
-
-
 13.  If we wanted to select the model that is "closest" to BMA,  we could use the model whose predictions are closest to BMA  using squared error loss.  We can find the best predictive model `BPM` from `BAS` using the predict function with `estimator="BPM"`.   Repeat 10 and 11 using the Best Predictive Model, `BPM`.
+
+```{r}
+library(BAS)
+#create vector with the same length and same name of betatrue
+beta_like = numeric(length(betatrue))
+names(beta_like) = names(betatrue)
+
+
+beta_model = betatrue
+beta_model[which(beta_model!=0)] = 1
+
+#initialize RMSE vector
+RMSE_beta  = rep(0,100)
+RMSE_mu  = rep(0,100)
+RMSE_test  = rep(0,100)
+
+
+df.bas = vector("list",100)
+for(i in 1:100){
+  rm(df)
+  load(fname[i])
+  df.bas[[i]] = bas.lm(Y ~.-mu, data=df[1:50,],
+                    prior="g-prior", a=nrow(df[1:50,]), modelprior=uniform(),
+                    method="MCMC", MCMC.iterations = 200000, thin = 20)
+  #get the BPM model
+  betas.bas = coef(df.bas[[i]])
+  betahat=betas.bas$postmean
+   
+  #the fitted values
+  muhat = fitted(df.bas[[i]], estimator="BPM")
+  #the predicted values
+  pred.df = predict(df.bas[[i]], newdata=df[51:75,], estimator="BPM")
+  predvalues = pred.df$fit
+  
+  #count how many times choose the true model
+  coe_position = beta_like
+  coe_position[which(betas.bas$postmean != 0)] = 1
+  if(all(coe_position == beta_model)){
+    count_true = count_true+1
+  }
+  
+  
+  ## for beta
+  RMSE_beta[i] = rmse(betatrue,betahat)
+  ## for mu
+  RMSE_mu[i] = rmse(mu[1:50], muhat) 
+  ## for testing data
+  RMSE_test[i] = rmse(Y[51:75],predvalues)    
+}
+
+ #  average RMSE for estimating beta
+avg_rmse_beta = mean(RMSE_beta)
+
+#  average RMSE for estimating mu
+avg_rmse_mu = mean(RMSE_mu)
+
+# average RMSE for testing data
+avg_rmse_test = mean(RMSE_test)
+
+#store RSME's in data frame
+rmse_df_bas = data.frame(RMSE_beta, RMSE_mu, RMSE_test)
+#beta
+ggplot(data = rmse_df_bas[1], aes(x = rmse_df_bas[1])) + 
+  geom_histogram(fill = "lightblue", color = "darkblue")+
+  geom_vline(xintercept = avg_rmse_beta, color = "red")
+#mu
+ggplot(data = rmse_df_bas[2], aes(x = rmse_df_bas[2])) + 
+  geom_histogram(fill = "khaki", color = "darkgoldenrod")+
+  geom_vline(xintercept = avg_rmse_mu, color = "darkblue")
+#test
+ggplot(data = rmse_df_bas[3], aes(x = rmse_df_bas[3])) + 
+  geom_histogram(fill = "salmon", color = "orangered3")+
+  geom_vline(xintercept = avg_rmse_test, color = "darkblue")
+
+count_true
+
+#diagnostic plots for MCMC convergence
+diagnostics(df.bas[[12]], type="pip")
+
+##redo Q11
+betas.bas = coef(df.bas[[12]]) 
+betas.bas
+confint(betas.bas)
+```
 
 
 14.  Are the Bayesian estimates sensitive to the choice of prior?  Try 10-13 using the Zellner-Siow Cauchy prior (option `prior = "ZS-null"` in `bas.lm`)  
 
+```{r}
+#redo Q10
+library(BAS)
+#create vector with the same length and same name of betatrue
+beta_like = numeric(length(betatrue))
+names(beta_like) = names(betatrue)
+
+
+beta_model = betatrue
+beta_model[which(beta_model!=0)] = 1
+
+#initialize RMSE vector
+RMSE_beta  = rep(0,100)
+RMSE_mu  = rep(0,100)
+RMSE_test  = rep(0,100)
+
+
+df.bas = vector("list",100)
+for(i in 1:100){
+  rm(df)
+  load(fname[i])
+  df.bas[[i]] = bas.lm(Y ~.-mu, data=df[1:50,],
+                    prior="ZS-null", a=nrow(df[1:50,]), modelprior=uniform(),
+                    method="MCMC", MCMC.iterations = 200000, thin = 20,
+                    initprobs="marg-eplogp")
+  #get the HPM model
+  betas.bas = coef(df.bas[[i]], n.models=1)
+  betahat=betas.bas$postmean
+   
+  #the fitted values
+  muhat = fitted(df.bas[[i]], estimator="HPM")
+  #the predicted values
+  pred.df = predict(df.bas[[i]], newdata=df[51:75,], estimator="HPM")
+  predvalues = pred.df$fit
+  
+  #count how many times choose the true model
+  coe_position = beta_like
+  coe_position[which(betas.bas$postmean != 0)] = 1
+  if(all(coe_position == beta_model)){
+    count_true = count_true+1
+  }
+  
+  
+  ## for beta
+  RMSE_beta[i] = rmse(betatrue,betahat)
+  ## for mu
+  RMSE_mu[i] = rmse(mu[1:50], muhat) 
+  ## for testing data
+  RMSE_test[i] = rmse(Y[51:75],predvalues)    
+}
+
+```
+
+```{r}
+#redo Q11
+betas.bas = coef(df.bas[[12]],n.models = 1) 
+betas.bas
+confint(betas.bas)
+```
+
+```{r}
+#redo Q12
+library(BAS)
+#create vector with the same length and same name of betatrue
+beta_like = numeric(length(betatrue))
+names(beta_like) = names(betatrue)
+
+
+beta_model = betatrue
+beta_model[which(beta_model!=0)] = 1
+
+#initialize RMSE vector
+RMSE_beta  = rep(0,100)
+RMSE_mu  = rep(0,100)
+RMSE_test  = rep(0,100)
+
+
+df.bas = vector("list",100)
+for(i in 1:100){
+  rm(df)
+  load(fname[i])
+  df.bas[[i]] = bas.lm(Y ~.-mu, data=df[1:50,],
+                    prior="ZS-null", a=nrow(df[1:50,]), modelprior=uniform(),
+                    method="MCMC", MCMC.iterations = 200000, thin = 20,
+                    initprobs="marg-eplogp")
+  #get the BMA model
+  betas.bas = coef(df.bas[[i]])
+  betahat=betas.bas$postmean
+   
+  #the fitted values
+  muhat = fitted(df.bas[[i]], estimator="BMA")
+  #the predicted values
+  pred.df = predict(df.bas[[i]], newdata=df[51:75,], estimator="BMA")
+  predvalues = pred.df$fit
+  
+  #count how many times choose the true model
+  coe_position = beta_like
+  coe_position[which(betas.bas$postmean != 0)] = 1
+  if(all(coe_position == beta_model)){
+    count_true = count_true+1
+  }
+  
+  
+  ## for beta
+  RMSE_beta[i] = rmse(betatrue,betahat)
+  ## for mu
+  RMSE_mu[i] = rmse(mu[1:50], muhat) 
+  ## for testing data
+  RMSE_test[i] = rmse(Y[51:75],predvalues)    
+}
+
+ #  average RMSE for estimating beta
+avg_rmse_beta = mean(RMSE_beta)
+
+#  average RMSE for estimating mu
+avg_rmse_mu = mean(RMSE_mu)
+
+# average RMSE for testing data
+avg_rmse_test = mean(RMSE_test)
+
+#store RSME's in data frame
+rmse_df_bas = data.frame(RMSE_beta, RMSE_mu, RMSE_test)
+#beta
+ggplot(data = rmse_df_bas[1], aes(x = rmse_df_bas[1])) + 
+  geom_histogram(fill = "lightblue", color = "darkblue")+
+  geom_vline(xintercept = avg_rmse_beta, color = "red")
+#mu
+ggplot(data = rmse_df_bas[2], aes(x = rmse_df_bas[2])) + 
+  geom_histogram(fill = "khaki", color = "darkgoldenrod")+
+  geom_vline(xintercept = avg_rmse_mu, color = "darkblue")
+#test
+ggplot(data = rmse_df_bas[3], aes(x = rmse_df_bas[3])) + 
+  geom_histogram(fill = "salmon", color = "orangered3")+
+  geom_vline(xintercept = avg_rmse_test, color = "darkblue")
+
+count_true
+
+#diagnostic plots for MCMC convergence
+diagnostics(df.bas[[12]], type="pip")
+
+##redo Q11
+betas.bas = coef(df.bas[[12]]) 
+betas.bas
+confint(betas.bas)
+
+```
+
+```{r}
+#redo Q13
+library(BAS)
+#create vector with the same length and same name of betatrue
+beta_like = numeric(length(betatrue))
+names(beta_like) = names(betatrue)
+
+
+beta_model = betatrue
+beta_model[which(beta_model!=0)] = 1
+
+#initialize RMSE vector
+RMSE_beta  = rep(0,100)
+RMSE_mu  = rep(0,100)
+RMSE_test  = rep(0,100)
+
+
+df.bas = vector("list",100)
+for(i in 1:100){
+  rm(df)
+  load(fname[i])
+  df.bas[[i]] = bas.lm(Y ~.-mu, data=df[1:50,],
+                    prior="ZS-null", a=nrow(df[1:50,]), modelprior=uniform(),
+                    method="MCMC", MCMC.iterations = 200000, thin = 20,
+                    initprobs="marg-eplogp")
+  #get the BPM model
+  betas.bas = coef(df.bas[[i]])
+  betahat=betas.bas$postmean
+   
+  #the fitted values
+  muhat = fitted(df.bas[[i]], estimator="BPM")
+  #the predicted values
+  pred.df = predict(df.bas[[i]], newdata=df[51:75,], estimator="BPM")
+  predvalues = pred.df$fit
+  
+  #count how many times choose the true model
+  coe_position = beta_like
+  coe_position[which(betas.bas$postmean != 0)] = 1
+  if(all(coe_position == beta_model)){
+    count_true = count_true+1
+  }
+  
+  
+  ## for beta
+  RMSE_beta[i] = rmse(betatrue,betahat)
+  ## for mu
+  RMSE_mu[i] = rmse(mu[1:50], muhat) 
+  ## for testing data
+  RMSE_test[i] = rmse(Y[51:75],predvalues)    
+}
+
+ #  average RMSE for estimating beta
+avg_rmse_beta = mean(RMSE_beta)
+
+#  average RMSE for estimating mu
+avg_rmse_mu = mean(RMSE_mu)
+
+# average RMSE for testing data
+avg_rmse_test = mean(RMSE_test)
+
+#store RSME's in data frame
+rmse_df_bas = data.frame(RMSE_beta, RMSE_mu, RMSE_test)
+#beta
+ggplot(data = rmse_df_bas[1], aes(x = rmse_df_bas[1])) + 
+  geom_histogram(fill = "lightblue", color = "darkblue")+
+  geom_vline(xintercept = avg_rmse_beta, color = "red")
+#mu
+ggplot(data = rmse_df_bas[2], aes(x = rmse_df_bas[2])) + 
+  geom_histogram(fill = "khaki", color = "darkgoldenrod")+
+  geom_vline(xintercept = avg_rmse_mu, color = "darkblue")
+#test
+ggplot(data = rmse_df_bas[3], aes(x = rmse_df_bas[3])) + 
+  geom_histogram(fill = "salmon", color = "orangered3")+
+  geom_vline(xintercept = avg_rmse_test, color = "darkblue")
+
+count_true
+
+#diagnostic plots for MCMC convergence
+diagnostics(df.bas[[12]], type="pip")
+
+##redo Q11
+betas.bas = coef(df.bas[[12]]) 
+betas.bas
+confint(betas.bas)
+
+```
 
 15.  Provide a summary of your simulation findings, with a table for the RMSEs for the different methods and parameters of interest $\beta$, $\mu$, $Y^{test}$ and proportion of time true model was selected.
 Does any one method seem to do better than the others or are some methods better for one estimation/prediction problem than the others?  Explain.
