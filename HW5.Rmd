@@ -348,7 +348,7 @@ Since c is not a function of $\beta$, we can leave it out of the following propo
 
 $$ e^{- \dfrac{1}{2} (\beta^T A \beta - 2 \beta B)} $$
 
-While completing the square in this situation is tedious, we can use knowledge of the strategy for the univariate normal, outlined on page 70 of Hoff, where it is easier to calculate the posterior mean and variance. It can be shown that the formulas for the posterior mean and variance also apply to the multivariate case, and so we know that the posterior mean is equal to $$ \dfrac{A}{B} $$ and the posterior variance is equal to $$ \dfrac{1}{A} $$. If we expand these equations out, using the right-hand side of equations A and B, and simplify, we find that:
+While completing the square in this situation is tedious, we can use knowledge of the strategy for the univariate normal, outlined on page 70 of Hoff, where it is easier to calculate the posterior mean and variance. It can be shown that the formulas for the posterior mean and variance also apply to the multivariate case, and so we know that the posterior mean is equal to $$ \dfrac{A}{B} $$ and the posterior variance is equal to $$ \dfrac{1}{A} $$. If we expand these equations out, using the right-hand side of equations A and B, and simplify, we find that we have a normal distribution with:
 
 
 $$Var[\beta | Y, g, \phi] = \dfrac{g}{g + 1}\sigma^2(X^tX)^{-1}$$
@@ -387,6 +387,8 @@ $$ = \dfrac{1}{\phi} ( \dfrac{1}{n} + \dfrac{g}{g + 1}(X^TX)^{-1} + I_n) $$
 
 
 8. What are the corresponding distributions in 7) unconditional on $\phi$?  (hint recall theorem from class)  Are $\beta_0$ and $\beta$ still independent?  Explain.
+
+
 
 9. Let $\tau = 1/g$ and substitute that in the prior for $\beta$
 $$\beta \mid \beta_0, \phi \sim N(0, (X^TX)^{-1}/(\tau \phi))
