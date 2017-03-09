@@ -388,6 +388,8 @@ $$ = \dfrac{1}{\phi} ( \dfrac{1}{n} + \dfrac{g}{g + 1}(X^TX)^{-1} + I_n) $$
 
 8. What are the corresponding distributions in 7) unconditional on $\phi$?  (hint recall theorem from class)  Are $\beta_0$ and $\beta$ still independent?  Explain.
 
+ANSWER:
+
 $$ p(\beta | Y, g) = \int p(\beta | Y, g, \phi) p(\phi | Y, g) d\phi $$
 $$ = \int (2\pi)^{-p/2} \begin{vmatrix}\dfrac{I_{n}}{\phi}\end{vmatrix}^{-1/2} exp(-\dfrac{(Y - (1_{n}\beta_{0} + X\beta))^T (I_{n}/\phi)^{-1} (Y - (1_{n}\beta_{0} + X\beta))}{2}) \dfrac{(\dfrac{\nu_{n}\hat{\sigma^2}}{2})}{\Gamma(\nu_{n}/2)}^{\nu_{n}/2} \phi^{\nu_{n}/2 - 1} exp(-\dfrac{\nu_{n}\hat{\sigma^2}}{2}) d\phi $$
 
@@ -409,6 +411,8 @@ $$
 If $\tau \sim G(1/2, n/2)$, show that the prior on $\beta$ is a Cauchy Distribution 
 $$\beta \mid  \phi, \beta_0 \sim C(0,  (X^TX/n)^{-1}/\phi)$$
 _(a Cauchy distribution is a Student t with 1 df - see notes for density)_
+
+ANSWER:
 
 $$p(\beta | \beta_{0}, \phi) = \int p(\beta | \beta_{0}, \phi, g)p(\tau | \phi, \beta_{0})p(\phi, \beta_{0}) d\tau $$
 
