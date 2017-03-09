@@ -309,7 +309,7 @@ ggplot(data = rmse_df_bic[2], aes(x = rmse_df_bic[2])) +
 ggplot(data = rmse_df_bic[3], aes(x = rmse_df_bic[3])) + 
   geom_histogram(fill = "salmon", color = "orangered3")+
   geom_vline(xintercept = avg_rmse_test, color = "darkblue")
-
+count_true
 
 ```
 
