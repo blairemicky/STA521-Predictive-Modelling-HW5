@@ -85,7 +85,7 @@ Finally, we used cbind to combine X1, X2, X3 to get desired dataset and also com
 
 In addition, we can see the similar pattern in both correlation heatmap of training data and testing data. In simulation, there are 5 variables(columns) have correlation to each other. In heat map, there are ranctangles around the diagnal indicating the same patterns.
 ```{r Prob1, echo=FALSE}
-set.seed(8675309)
+set.seed(422)
 # true parameters
 sigma = 2.5
 betatrue = c(4,2,0,0,0,-1,0,1.5, 0,0,0,1,0,.5,0,0,0,0,-1,1,4)
@@ -180,10 +180,8 @@ for( i in 1:100) {
   beta.ols = coef(ls[[i]])
   X.ols = model.matrix(Y ~ . -mu, data=df[1:50,])
   RMSE.beta[i] = sqrt(mean((betatrue - beta.ols)^2))
-  # RMSE.mu[i] = sqrt(mean((mu[1:50,] - X.ols %*% beta.ols)^2))
-  RMSE.mu[i] = sqrt(sum((X.ols %*% beta.ols- mu[1:50,])^2)/50)
-    #sqrt(mean((mu[1:50,] - (beta.ols[1] + X.ols[ , -1] %*% beta.ols[-1]))^2))
-  RMSE.test.pred[i] = sqrt(mean((Y[51:75] - predict(ls[[i]], newdata = df[51:75,]))^2))
+  RMSE.mu[i] = sqrt(mean((df$mu[1:50] - X.ols %*% beta.ols)^2))
+  RMSE.test.pred[i] = sqrt(mean((df$Y[51:75] - predict(ls[[i]], newdata = df[51:75,]))^2))
 }
 
 #  average RMSE for estimating beta
@@ -214,7 +212,7 @@ p2<-ggplot(data = rmse.df[2], aes(x = rmse.df[2])) + theme_light() + labs(x = "R
 #histogram: test prediction
 p3<-ggplot(data = rmse.df[3], aes(x = rmse.df[3])) + theme_light() + labs(x = "RMSE: Test Predictions", y = "Count") + geom_histogram(fill = "salmon", color = "orangered3", bins=20) + geom_vline(xintercept = avg.rmse.test, color = "darkblue")
 
-multiplot(p1, p2, p3, cols=2)
+multiplot(p1, p2, p3, cols=3)
 
 
 ```
@@ -262,9 +260,9 @@ for(i in 1:100){
   ## for beta
   RMSE_beta_aic[i] = rmse(betatrue,beta_e)
   ## for mu
-  RMSE_mu_aic[i] = rmse(mu[1:50], app_best$fitted.values)
+  RMSE_mu_aic[i] = rmse(df$mu[1:50], app_best$fitted.values)
   ## for testing data
-  RMSE_test_aic[i] = rmse(Y[51:75],predict(app_best, newdata = df[51:75,]))
+  RMSE_test_aic[i] = rmse(df$Y[51:75],predict(app_best, newdata = df[51:75,]))
 }
 
 #  average RMSE for estimating beta
@@ -293,7 +291,7 @@ p3<-ggplot(data = rmse_df_aic[3], aes(x = rmse_df_aic[3])) +
   geom_histogram(fill = "salmon", color = "orangered3")+ labs(x = "RSME: Test Prediction", y = "Count") +
   geom_vline(xintercept = avg_rmse_test, color = "darkblue")
 
-multiplot(p1, p2, p3, cols=2)
+multiplot(p1, p2, p3, cols=3)
 
 
 ```
@@ -360,9 +358,9 @@ for(i in 1:100){
   ## for beta
   RMSE_beta_bic[i] = rmse(betatrue,beta_e)
   ## for mu
-  RMSE_mu_bic[i] = rmse(mu[1:50], app_best$fitted.values)
+  RMSE_mu_bic[i] = rmse(df$mu[1:50], app_best$fitted.values)
   ## for testing data
-  RMSE_test_bic[i] = rmse(Y[51:75],predict(app_best, newdata = df[51:75,]))
+  RMSE_test_bic[i] = rmse(df$Y[51:75],predict(app_best, newdata = df[51:75,]))
 }
 
 #  average RMSE for estimating beta
@@ -391,7 +389,7 @@ p3<-ggplot(data = rmse_df_bic[3], aes(x = rmse_df_bic[3])) +
   geom_histogram(fill = "salmon", color = "orangered3")+
   geom_vline(xintercept = avg_rmse_test, color = "darkblue")
 
-multiplot(p1,p2,p3, cols = 2)
+multiplot(p1,p2,p3, cols = 3)
 
 ```
 The number of "correct" models is `count_true`. The average RMSE for $\beta^{true}$, $\mu^{true}$ and out of sample prediction are `r avg_rmse_bic[1]`, `r avg_rmse_bic[2]`, and `r avg_rmse_bic[3]`, respectively.
@@ -651,7 +649,7 @@ for(i in 1:100){
   beta_bpm = beta_like
   # call the function coef.HPM to compute the betahat's for the HPM
   bpm_summary<-coef.BPM(app_best)
-  # create beta_hpm of length(betatrue) with zeros for left out predictors
+  # create beta_bpm of length(betatrue) with zeros for left out predictors
   beta_bpm[bpm_summary$HPM+1] = bpm_summary$betahat
   
   # Check if the HPM is identical with the true model in terms of variable selection
@@ -667,28 +665,28 @@ for(i in 1:100){
   RMSE_beta_HPM[i] = rmse(betatrue,beta_hpm)
   ## HPM: RMSE for mu_true (fitting)
   mu_fit<-fitted(app_best, estimator = "HPM")
-  RMSE_mu_HPM[i] = rmse(mu[1:50], mu_fit)
+  RMSE_mu_HPM[i] = rmse(df$mu[1:50], mu_fit)
   ## HPM: RMSE for Y_true (prediction on test data)
   y_pred<-predict.bas(app_best,newdata=df[51:75,], estimator="HPM", prediction=TRUE)
-  RMSE_test_HPM[i] = rmse(Y[50:75],y_pred$fit)
+  RMSE_test_HPM[i] = rmse(df$Y[50:75],y_pred$fit)
   
   ## BMA: RMSE for beta_true (fitting)
   RMSE_beta_BMA[i] = rmse(betatrue,coef(app_best)$postmean)
   ## BMA: RMSE for mu_true (fitting)
   mu_fit<-fitted(app_best, estimator = "BMA")
-  RMSE_mu_BMA[i] = rmse(mu[1:50], mu_fit)
+  RMSE_mu_BMA[i] = rmse(df$mu[1:50], mu_fit)
   ## BMA: RMSE for Y_true (prediction on test data)
   y_pred<-predict.bas(app_best,newdata=df[51:75,], estimator="BMA", prediction=TRUE)
-  RMSE_test_BMA[i] = rmse(Y[51:75],y_pred$fit)
+  RMSE_test_BMA[i] = rmse(df$Y[51:75],y_pred$fit)
   
   ## BPM: RMSE for beta_true (fitting)
   RMSE_beta_BPM[i] = rmse(betatrue,beta_bpm)
   ## BPM: RMSE for mu_true (fitting)
   mu_fit<-fitted(app_best, estimator = "BPM")
-  RMSE_mu_BPM[i] = rmse(mu[1:50], mu_fit)
+  RMSE_mu_BPM[i] = rmse(df$mu[1:50], mu_fit)
   ## BPM: RMSE for Y_true (prediction on test data)
   y_pred<-predict.bas(app_best,newdata=df[51:75,], estimator="BPM", prediction=TRUE)
-  RMSE_test_BPM[i] = rmse(Y[51:75],y_pred$fit)
+  RMSE_test_BPM[i] = rmse(df$Y[51:75],y_pred$fit)
   
 }
 
@@ -723,7 +721,7 @@ g3<-ggplot(data = RMSE[3], aes(x = RMSE[3])) +
   geom_histogram(fill = "salmon", color = "orangered3")+
   geom_vline(xintercept = mean(RMSE[,3]), color = "darkblue")+ labs(title="HPM: RMSE for prediction", x="RMSE", y="Count")
 
-multiplot(g1,g2,g3,cols = 2)
+multiplot(g1,g2,g3,cols = 3)
 
 ```
 
@@ -807,7 +805,7 @@ q3<-ggplot(data = RMSE[3], aes(x = RMSE[3])) +
   geom_histogram(fill = "salmon", color = "orangered3")+
   geom_vline(xintercept = mean(RMSE[,3]), color = "darkblue")+ labs(title="BPM: RMSE for test prediction ", x="RMSE", y="Count")
 
-multiplot(q1,q2,q3,cols=2)
+multiplot(q1,q2,q3,cols=3)
 
 ### Confidence interval ####
 
@@ -853,7 +851,7 @@ RMSE_beta_BPM = rep(0,100)
 RMSE_mu_BPM  = rep(0,100)
 RMSE_test_BPM  = rep(0,100)
 
-for(i in 1:10){
+for(i in 1:100){
   print(i)
   rm(df)
   load(fname[i])
@@ -899,28 +897,28 @@ for(i in 1:10){
   RMSE_beta_HPM[i] = rmse(betatrue,beta_hpm)
   ## HPM: RMSE for mu_true (fitting)
   mu_fit<-fitted(app_best, estimator = "HPM")
-  RMSE_mu_HPM[i] = rmse(mu[1:50], mu_fit)
+  RMSE_mu_HPM[i] = rmse(df$mu[1:50], mu_fit)
   ## HPM: RMSE for Y_true (prediction on test data)
   y_pred<-predict.bas(app_best,newdata=df[51:75,], estimator="HPM", prediction=TRUE)
-  RMSE_test_HPM[i] = rmse(Y[50:75],y_pred$fit)
+  RMSE_test_HPM[i] = rmse(df$Y[50:75],y_pred$fit)
   
   ## BMA: RMSE for beta_true (fitting)
   RMSE_beta_BMA[i] = rmse(betatrue,coef(app_best)$postmean)
   ## BMA: RMSE for mu_true (fitting)
   mu_fit<-fitted(app_best, estimator = "BMA")
-  RMSE_mu_BMA[i] = rmse(mu[1:50], mu_fit)
+  RMSE_mu_BMA[i] = rmse(df$mu[1:50], mu_fit)
   ## BMA: RMSE for Y_true (prediction on test data)
   y_pred<-predict.bas(app_best,newdata=df[51:75,], estimator="BMA", prediction=TRUE)
-  RMSE_test_BMA[i] = rmse(Y[51:75],y_pred$fit)
+  RMSE_test_BMA[i] = rmse(df$Y[51:75],y_pred$fit)
   
   ## BPM: RMSE for beta_true (fitting)
   RMSE_beta_BPM[i] = rmse(betatrue,beta_bpm)
   ## BPM: RMSE for mu_true (fitting)
   mu_fit<-fitted(app_best, estimator = "BPM")
-  RMSE_mu_BPM[i] = rmse(mu[1:50], mu_fit)
+  RMSE_mu_BPM[i] = rmse(df$df$mu[1:50], mu_fit)
   ## BPM: RMSE for Y_true (prediction on test data)
   y_pred<-predict.bas(app_best,newdata=df[51:75,], estimator="BPM", prediction=TRUE)
-  RMSE_test_BPM[i] = rmse(Y[51:75],y_pred$fit)
+  RMSE_test_BPM[i] = rmse(df$Y[51:75],y_pred$fit)
   
 }
 
