@@ -710,7 +710,7 @@ confint(betas.bas)
 12.  To incorporate model uncertainty we could use  Bayesian Model Averaging, rather than the highest probability model. Repeat 10 and 11 using BMA for estimating the quantities.
 
 
-```{r output12}
+```{r output12, echo=FALSE}
 RMSE<-RMSE_BMA
 
 #beta
@@ -720,13 +720,16 @@ b1<-ggplot(data = RMSE[1], aes(x = RMSE[1])) +
 #mu
 b2<-ggplot(data = RMSE[2], aes(x = RMSE[2])) + 
   geom_histogram(fill = "khaki", color = "darkgoldenrod")+
-  geom_vline(xintercept = mean(RMSE[,2]), color = "darkblue")+ labs(title="BMA: RMSE for beta ", x="RMSE", y="Count")
+  geom_vline(xintercept = mean(RMSE[,2]), color = "darkblue")+ labs(title="BMA: RMSE for mu ", x="RMSE", y="Count")
 #test
 b3<-ggplot(data = RMSE[3], aes(x = RMSE[3])) + 
   geom_histogram(fill = "salmon", color = "orangered3")+
-  geom_vline(xintercept = mean(RMSE[,3]), color = "darkblue")+ labs(title="BMA: RMSE for beta ", x="RMSE", y="Count")
+  geom_vline(xintercept = mean(RMSE[,3]), color = "darkblue")+ labs(title="BMA: RMSE for test prediction ", x="RMSE", y="Count")
 
 multiplot(b1,b2,b3,cols = 2)
+
+## confint
+
 
 rm(df)
 load(fname[12])
@@ -734,13 +737,22 @@ app_best_BMA12 = app_best = bas.lm(Y~.-mu, data=df[1:50,],
                     prior="g-prior", a=nrow(df[1:50,]), modelprior=uniform(),
                     method="MCMC", MCMC.iterations = 200000, thin = 20)
 
-print(confint.coef.bas(coef(app_best_BMA12)))
+
+beta_like<-confint.coef.bas(coef(app_best_BMA12))
+
+
+MCT<-as.data.frame(cbind(beta_like,betatrue) )
+colnames(MCT)<-c( "lci", "uci","post.mean", "truth")
+ggplot(MCT, aes(x=names(betatrue), y=post.mean),show.legend = TRUE) + 
+    geom_errorbar(aes(ymin=lci, ymax=uci), width=.1) +
+    geom_point()+geom_point(aes(y=truth),color="red")+labs(title="Bayesian Model Averaging (BMA) (black=estimate, red=truth)", x="Coefficients", y="Value")
+
 
 
 ```
 
 
-
+From The figure we see that the true values of all coefficeint are contained in the posterior credible intervals. 19 and 20 are, once more, problematic in the sense that there is a very large credible interval. 
 
 
 13.  If we wanted to select the model that is "closest" to BMA,  we could use the model whose predictions are closest to BMA  using squared error loss.  We can find the best predictive model `BPM` from `BAS` using the predict function with `estimator="BPM"`.   Repeat 10 and 11 using the Best Predictive Model, `BPM`.
@@ -749,19 +761,21 @@ print(confint.coef.bas(coef(app_best_BMA12)))
 RMSE<-RMSE_BPM
 
 #beta
-ggplot(data = RMSE[1], aes(x = RMSE[1])) + 
+q1<-ggplot(data = RMSE[1], aes(x = RMSE[1])) + 
   geom_histogram(fill = "lightblue", color = "darkblue")+
   geom_vline(xintercept = mean(RMSE[,1]), color = "red")+ labs(title="BPM: RMSE for beta ", x="RMSE", y="Count")
 #mu
-ggplot(data = RMSE[2], aes(x = RMSE[2])) + 
+q2<-ggplot(data = RMSE[2], aes(x = RMSE[2])) + 
   geom_histogram(fill = "khaki", color = "darkgoldenrod")+
   geom_vline(xintercept = mean(RMSE[,2]), color = "darkblue")+ labs(title="BPM: RMSE for beta ", x="RMSE", y="Count")
 #test
-ggplot(data = RMSE[3], aes(x = RMSE[3])) + 
+q3<-ggplot(data = RMSE[3], aes(x = RMSE[3])) + 
   geom_histogram(fill = "salmon", color = "orangered3")+
   geom_vline(xintercept = mean(RMSE[,3]), color = "darkblue")+ labs(title="BPM: RMSE for beta ", x="RMSE", y="Count")
-count_true
 
+multiplot(q1,q2,q3,cols=2)
+
+### Confidence interval ####
 
 rm(df)
 load(fname[12])
@@ -776,12 +790,10 @@ count_true_bpm
 
 
 
-
-
 14.  Are the Bayesian estimates sensitive to the choice of prior?  Try 10-13 using the Zellner-Siow Cauchy prior (option `prior = "ZS-null"` in `bas.lm`)  
 
 ```{r}
-#redo Q10
+## Bulk code for 10-12
 library(BAS)
 #create vector with the same length and same name of betatrue
 beta_like = numeric(length(betatrue))
