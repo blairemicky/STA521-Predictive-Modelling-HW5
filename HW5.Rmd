@@ -663,16 +663,20 @@ Comment on whether the intervals contain the true value or zero.
 ```{r}
 rm(df) 
 load(fname[12])
-  # Use BAS for model sampling (method=MCMC for speed; method=BAS for enumeration)
-  app_best = bas.lm(Y~.-mu, data=df[1:50,],
-                    prior="g-prior", a=nrow(df[1:50,]), modelprior=uniform(),
-                    method="MCMC", MCMC.iterations = 200000, thin = 20)
-  
-  
-  best = which.max(app_best$postprobs)
-  model = app_best$which[[best]]
+# Use BAS for model sampling (method=MCMC for speed; method=BAS for enumeration)
+app_best = bas.lm(Y~.-mu, data=df[1:50,],
+                  prior="g-prior", a=nrow(df[1:50,]), modelprior=uniform(),
+                  method="MCMC", MCMC.iterations = 200000, thin = 20)
+mod_hpm=rep(0,21)
+mod_hpm[coef.HPM(app_best)$HPM+1]<-1
+best_mod =     bas.lm(Y~.-mu, data=df[1:50,],a=nrow(df[1:50,]), prior="g-prior",n.models=1,bestmodel=mod_hpm )
 
+MCT<-as.data.frame(cbind(confint(coef(best_mod)),betatrue) )
 
+colnames(MCT)<-c( "lci", "uci","mean","truth")
+ggplot(MCT, aes(x=names(betatrue), y=mean),show.legend = TRUE) + 
+  geom_errorbar(aes(ymin=lci, ymax=uci), width=.1) +
+  geom_point()+geom_point(aes(y=truth),color="red")+labs(title="Posterior Confidence Intervals for HPM (black=estimate, red=truth)", x="Coefficients", y="Value")
 ```
 
 
@@ -868,7 +872,7 @@ RMSE_BMA = data.frame(RMSE_beta_BMA, RMSE_mu_BMA, RMSE_test_BMA)
 RMSE_BPM = data.frame(RMSE_beta_BPM, RMSE_mu_BPM, RMSE_test_BPM)
 ```
 
-```{r, Prob14.2, echo=FALSE, cache=TRUE}
+```{r, Prob14.2, echo=FALSE, cache=FALSE}
 ### OUTPUT FOR 10
 
 RMSE<-RMSE_HPM
