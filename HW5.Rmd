@@ -123,7 +123,9 @@ for (i in 1:100) {
   X <- cbind(X1,X2,X3)
   
   # subtract off the column means
-  X = sweep(X, 2, apply(X,2, mean)) 
+  X[1:50,] = sweep(X[1:50,], 2, apply(X[1:50,],2, mean)) 
+  X[51:75,] = sweep(X[51:75,], 2, apply(X[51:75,],2, mean)) 
+
   
   # Generate mu     
   # X does not have a column of ones for the intercept so need to add the intercept  
@@ -178,7 +180,9 @@ for( i in 1:100) {
   beta.ols = coef(ls[[i]])
   X.ols = model.matrix(Y ~ . -mu, data=df[1:50,])
   RMSE.beta[i] = sqrt(mean((betatrue - beta.ols)^2))
-  RMSE.mu[i] = sqrt(mean((mu[1:50,] - X.ols %*% beta.ols)^2))
+  # RMSE.mu[i] = sqrt(mean((mu[1:50,] - X.ols %*% beta.ols)^2))
+  RMSE.mu[i] = sqrt(sum((X.ols %*% beta.ols- mu[1:50,])^2)/50)
+    #sqrt(mean((mu[1:50,] - (beta.ols[1] + X.ols[ , -1] %*% beta.ols[-1]))^2))
   RMSE.test.pred[i] = sqrt(mean((Y[51:75] - predict(ls[[i]], newdata = df[51:75,]))^2))
 }
 
@@ -482,7 +486,10 @@ $$ = \dfrac{1}{\phi} \left( I_n\left(1+\dfrac{1}{n}\right) + x_i\dfrac{g}{g + 1}
 
 8. What are the corresponding distributions in 7) unconditional on $\phi$?  (hint recall theorem from class)  Are $\beta_0$ and $\beta$ still independent?  Explain.
 
-ANSWER:
+ANSWER: First we take the shortcut, and then we do the actual calculations. 
+
+SHORTCUT VERSION:
+a) From the theorem for the marginal distribution of a Normal-Gamma, we know that if 
 
 a)
 
