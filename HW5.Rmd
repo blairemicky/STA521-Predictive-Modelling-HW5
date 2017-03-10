@@ -501,9 +501,10 @@ $$ \propto \int \phi^{(p+\nu_{n})/2 -1} exp(-\dfrac{(\beta - \dfrac{g}{g + 1}\ha
 
 This is the kernel of a gamma and we know that it is equal to the reciprocal of its proportional constant:
 
-$$  = \Gamma(\dfrac{p + \nu_{n}}{2}) \Big[\dfrac{(Y - (1_{n}\beta_{0} + X\beta))^T (Y - (1_{n}\beta_{0} + X\beta)) + \nu_{n}\hat{\sigma^2}}{2}\Big]^{-(p + \nu_{n})/2} \propto \Big[(Y - (1_{n}\beta_{0} + X\beta))^T (Y - (1_{n}\beta_{0} + X\beta)) + \nu_{n}\hat{\sigma^2}\Big]^{-(p + \nu_{n})/2} $$
+$$  = \Gamma(\dfrac{p + \nu_{n}}{2}) \Big[\dfrac{(\beta - \dfrac{g}{g + 1}\hat{\beta}_{OLS})^T (\dfrac{g + 1}{g }(X^TX))  (\beta - \dfrac{g}{g + 1}\hat{\beta}_{OLS}) + \nu_{n}\hat{\sigma^2}}{2}\Big]^{-(p + \nu_{n})/2} $$
+$$ \propto \Big[(\beta - \dfrac{g}{g + 1}\hat{\beta}_{OLS})^T (\dfrac{g + 1}{g }(X^TX))  (\beta - \dfrac{g}{g + 1}\hat{\beta}_{OLS}) + \nu_{n}\hat{\sigma^2}\Big]^{-(p + \nu_{n})/2} $$
 
-$$ \propto \Big[1 + \dfrac{1}{\nu_{n}}\dfrac{(Y - (1_{n}\beta_{0} + X\beta))^T (Y - (1_{n}\beta_{0} + X\beta))}{\hat{\sigma^2}}\Big]^{-(p+\nu_{n})/2} $$
+$$ \propto \Big[1 + \dfrac{1}{\nu_{n}}\dfrac{(\beta - \dfrac{g}{g + 1}\hat{\beta}_{OLS})^T (\dfrac{g + 1}{g }(X^TX))  (\beta - \dfrac{g}{g + 1}\hat{\beta}_{OLS})}{\hat{\sigma^2}}\Big]^{-(p+\nu_{n})/2} $$
 
 This is proportional to a Student-T distribution with $\nu_{n}$ degrees of freedom.
 
