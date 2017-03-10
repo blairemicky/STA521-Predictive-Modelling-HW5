@@ -497,7 +497,7 @@ $$ = \int (2\pi)^{-p/2} \begin{vmatrix}\dfrac{g}{(g + 1)\phi}(X^TX)^{-1}\end{vma
 
 $$ \propto \int \phi^{p/2} \phi^{\nu_{n}/2 -1} exp(-\dfrac{(\beta - \dfrac{g}{g + 1}\hat{\beta}_{OLS})^T (\dfrac{g + 1}{g }\phi(X^TX)) (\beta - \dfrac{g}{g + 1}\hat{\beta}_{OLS})}{2}) exp(-\dfrac{\nu_{n}\hat{\sigma^2}}{2}) d\phi $$
 
-$$ \propto \int \phi^{(p+\nu_{n})/2 -1} exp(-\dfrac{(\beta - \dfrac{g}{g + 1}\hat{\beta}_{OLS})^T (\beta - \dfrac{g}{g + 1}\hat{\beta}_{OLS})}{2}) + \nu_{n}\hat{\sigma^2}}{2}\phi) d\phi $$ 
+$$ \propto \int \phi^{(p+\nu_{n})/2 -1} exp(-\dfrac{(\beta - \dfrac{g}{g + 1}\hat{\beta}_{OLS})^T (\dfrac{g + 1}{g }(X^TX))  (\beta - \dfrac{g}{g + 1}\hat{\beta}_{OLS}) + \nu_{n}\hat{\sigma^2}}{2}\phi) d\phi $$
 
 This is the kernel of a gamma and we know that it is equal to the reciprocal of its proportional constant:
 
