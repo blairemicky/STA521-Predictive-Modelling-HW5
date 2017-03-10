@@ -197,14 +197,14 @@ avg.rmse.test = mean(RMSE.test.pred)
 avg.rmse.df = data.frame(beta = avg.rmse.beta, mu = avg.rmse.mu, test = avg.rmse.test)
 
 #Table for average RMSE's
-kable(avg.rmse.df, caption = "Average RMSE's")
+#kable(avg.rmse.df, caption = "Average RMSE's")
 
 #store RSME's in data frame
 rmse.df = data.frame(RMSE.beta, RMSE.mu, RMSE.test.pred)
 
 
 #histogram: beta
-p1<-ggplot(data = rmse.df[1], aes(x = rmse.df[1])) + theme_light() + labs(x = "RSME: Beta", y = "Count") + geom_histogram(fill = "lightblue", color = "darkblue",bins=30) + geom_vline(xintercept = avg.rmse.beta, color = "red")+labs(title="AIC Step Selection")
+p1<-ggplot(data = rmse.df[1], aes(x = rmse.df[1])) + theme_light() + labs(x = "RSME: Beta", y = "Count") + geom_histogram(fill = "lightblue", color = "darkblue",bins=30) + geom_vline(xintercept = avg.rmse.beta, color = "red")+labs(title="OLS Model")
 
 #histogram: mu
 p2<-ggplot(data = rmse.df[2], aes(x = rmse.df[2])) + theme_light() + labs(x = "RMSE: Mu", y = "Count") + geom_histogram(fill = "khaki", color = "darkgoldenrod", bins=20) + geom_vline(xintercept = avg.rmse.mu, color = "darkblue")
@@ -280,7 +280,7 @@ avg_rmse_aic<-data.frame(avg_rmse_beta,avg_rmse_mu,avg_rmse_test )
 rmse_df_aic = data.frame(RMSE_beta_aic, RMSE_mu_aic, RMSE_test_aic)
 #beta
 p1<-ggplot(data = rmse_df_aic[1], aes(x = rmse_df_aic[1])) + 
-  geom_histogram(fill = "lightblue", color = "darkblue")+ labs(x = "RSME: Beta", y = "Count") +
+  geom_histogram(fill = "lightblue", color = "darkblue")+ labs(title="AIC Step Selection", x = "RSME: Beta", y = "Count") +
   geom_vline(xintercept = avg_rmse_beta, color = "red")
 #mu
 p2<-ggplot(data = rmse_df_aic[2], aes(x = rmse_df_aic[2])) + 
@@ -295,7 +295,7 @@ multiplot(p1, p2, p3, cols=3)
 
 
 ```
-The number of "correct" models is `count_true`. The average RMSE for $\beta^{true}$, $\mu^{true}$ and out of sample prediction are `r avg_rmse_aic[1]`, `r avg_rmse_aic[2]`, and `r avg_rmse_aic[3]`, respectively.
+The number of "correct" models is `count_true`. The average RMSE for $\beta^{true}$, $\mu^{true}$ and out of sample prediction are `r avg_rmse_aic[1]`, `r avg_rmse_aic[2]`, and `r avg_rmse_aic[3]`, respectively. The full distributions are found in the plots above.
 
 
 4.  Take a look at the summaries from the estimates under the best AIC model from the simulation that is equal to your team number.  Create confidence intervals for the $\beta$'s and comment on whether they include zero or not or the true value.
@@ -320,7 +320,7 @@ ggplot(MCT, aes(x=names(betatrue), y=mean),show.legend = TRUE) +
 
 ```
 
-From the figure we see that with the exception of coefficients 9, 13, 18 and 19, the confidence intervals include the true value of $\beta$. Coefficients 9 and 17 are nonzero although the true values are zero. Conversely, coefficeints 18 and 19 are not included in the best model although their true values are non-zero.
+From the figure we see that with the exception of coefficients  13, 18, 19 and 20 the confidence intervals include the true value of $\beta$. Coefficients 13, 18 and 19 are not included in the model (set to zero) although their true values are non-zero. Conversely, coefficeint 8 is included and non-zero although the true value is zero.
 
 
 5.   Use BIC with either stepwise or all possible subsets to select a model and then use OLS to estimate the parameters under that model.  Use the estimates to compute the RMSE for a) estimating $\beta^{true}$, b) $\mu^{true}$, and c) predicting $Y^{test}$. Present  histograms of the RMSE, and show where the average RMSE falls on the plot.   Also report d) the number of times you select the true model using BIC out of the 100 simulations. 
@@ -379,15 +379,15 @@ rmse_df_bic = data.frame(RMSE_beta_bic, RMSE_mu_bic, RMSE_test_bic)
 #beta
 p1<-ggplot(data = rmse_df_bic[1], aes(x = rmse_df_bic[1])) + 
   geom_histogram(fill = "lightblue", color = "darkblue")+
-  geom_vline(xintercept = avg_rmse_beta, color = "red")
+  geom_vline(xintercept = avg_rmse_beta, color = "red")+ labs(title="BIC Step Selection", x = "RSME: Beta", y = "Count")
 #mu
 p2<-ggplot(data = rmse_df_bic[2], aes(x = rmse_df_bic[2])) + 
   geom_histogram(fill = "khaki", color = "darkgoldenrod")+
-  geom_vline(xintercept = avg_rmse_mu, color = "darkblue")
+  geom_vline(xintercept = avg_rmse_mu, color = "darkblue")+ labs( x = "RSME: Mu", y = "Count")
 #test
 p3<-ggplot(data = rmse_df_bic[3], aes(x = rmse_df_bic[3])) + 
   geom_histogram(fill = "salmon", color = "orangered3")+
-  geom_vline(xintercept = avg_rmse_test, color = "darkblue")
+  geom_vline(xintercept = avg_rmse_test, color = "darkblue")+ labs(x = "RSME: Test prediction", y = "Count")
 
 multiplot(p1,p2,p3, cols = 3)
 
@@ -417,7 +417,7 @@ ggplot(MCT, aes(x=names(betatrue), y=mean),show.legend = TRUE) +
 
 ```
 
-From the figure we see that with the exception of coefficients 9, 13, 18 and 19, and 20, the confidence intervals include the true value of $\beta$. Coefficient 9 is nonzero although the true value is zero. Conversely, coefficeints 5, 18 and 19 are not included in the best model although their true values are non-zero.
+From the figure we see that with the exception of coefficients 13, 18 and 19, and 20, the confidence intervals include the true value of $\beta$. Coefficeints 13, 18 and 19 are not included in the best model although their true values are non-zero.
 
 
 
@@ -698,8 +698,7 @@ RMSE_HPM = data.frame(RMSE_beta_HPM, RMSE_mu_HPM, RMSE_test_HPM)
 RMSE_BMA = data.frame(RMSE_beta_BMA, RMSE_mu_BMA, RMSE_test_BMA)
 RMSE_BPM = data.frame(RMSE_beta_BPM, RMSE_mu_BPM, RMSE_test_BPM)
 
-#diagnostic plots for MCMC convergence
-#diagnostics(app_best, type="pip")
+
 
 ```
 
@@ -711,29 +710,44 @@ RMSE<-RMSE_HPM
 #beta
 g1<-ggplot(data = RMSE[1], aes(x = RMSE[1])) + 
   geom_histogram(fill = "lightblue", color = "darkblue")+
-  geom_vline(xintercept = mean(RMSE[,1]), color = "red") + labs(title="HPM: RMSE for beta ", x="RMSE", y="Count")
+  geom_vline(xintercept = mean(RMSE[,1]), color = "red") + labs(title="RMSEs for HPM", x="RMSE for beta", y="Count")
 #mu
 g2<-ggplot(data = RMSE[2], aes(x = RMSE[2])) + 
   geom_histogram(fill = "khaki", color = "darkgoldenrod")+
-  geom_vline(xintercept = mean(RMSE[,2]), color = "darkblue")+ labs(title="HPM: RMSE for mu ", x="RMSE", y="Count")
+  geom_vline(xintercept = mean(RMSE[,2]), color = "darkblue")+ labs( x="RMSE for mu", y="Count")
 #test
 g3<-ggplot(data = RMSE[3], aes(x = RMSE[3])) + 
   geom_histogram(fill = "salmon", color = "orangered3")+
-  geom_vline(xintercept = mean(RMSE[,3]), color = "darkblue")+ labs(title="HPM: RMSE for prediction", x="RMSE", y="Count")
+  geom_vline(xintercept = mean(RMSE[,3]), color = "darkblue")+ labs(x="RMSE for prediction", y="Count")
 
 multiplot(g1,g2,g3,cols = 3)
 
 ```
 
 
-The number of times the "correct" model is selected is `r count_true_hpm`. 
+The number of times the "correct" model is selected is `r count_true_hpm`. The mean RMSEs for $\beta^{true}$, $\mu^{true}$ and $Y^{pred}$ were `r mean(RMSE_beta_HPM)`, `r mean(RMSE_muy_HPM)` and `r mean(RMSE_test_HPM)`, respectively. Since we used MCMC, we checked the 'pip' plots for several datasets. We found them to be satisfatory, see below for the diagnostics of the last data set.
 
+```{r}
+#diagnostic plots for MCMC convergence
+diagnostics(app_best, type="pip")
+
+```
 
 
 11.  Using the simulation that is equal to your team numbers, provide posterior summaries of the coefficient's of the HPM, such as Bayesian Confidence intervals.  
 Comment on whether the intervals contain the true value or zero.
 
 ```{r}
+rm(df) 
+load(fname[12])
+  # Use BAS for model sampling (method=MCMC for speed; method=BAS for enumeration)
+  app_best = bas.lm(Y~.-mu, data=df[1:50,],
+                    prior="g-prior", a=nrow(df[1:50,]), modelprior=uniform(),
+                    method="MCMC", MCMC.iterations = 200000, thin = 20)
+  
+  
+  best = which.max(app_best$postprobs)
+  model = app_best$which[[best]]
 
 
 ```
