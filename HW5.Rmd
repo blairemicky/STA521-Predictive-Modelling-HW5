@@ -272,7 +272,7 @@ avg_rmse_mu = mean(RMSE_mu_aic)
 # average RMSE for testing data
 avg_rmse_test = mean(RMSE_test_aic)
 
-avg_rmse_aic<-data.frame(avg_rmse_beta,avg_rmse_mu,avg_rmse_test )
+avg_rmse_aic<-data.frame(beta = avg_rmse_beta, mu = avg_rmse_mu, test = avg_rmse_test )
 
 #store RSME's in data frame
 rmse_df_aic = data.frame(RMSE_beta_aic, RMSE_mu_aic, RMSE_test_aic)
@@ -370,7 +370,7 @@ avg_rmse_mu = mean(RMSE_mu_bic)
 # average RMSE for testing data
 avg_rmse_test = mean(RMSE_test_bic)
 
-avg_rmse_bic<-data.frame(avg_rmse_beta,avg_rmse_mu,avg_rmse_test)
+avg_rmse_bic<-data.frame(beta = avg_rmse_beta,mu = avg_rmse_mu,test = avg_rmse_test)
 
 #store RSME's in data frame
 rmse_df_bic = data.frame(RMSE_beta_bic, RMSE_mu_bic, RMSE_test_bic)
@@ -689,10 +689,14 @@ for(i in 1:100){
 # Prepare for outputs
 
 #store RSME's in data frame
-RMSE_HPM = data.frame(RMSE_beta_HPM, RMSE_mu_HPM, RMSE_test_HPM)
-RMSE_BMA = data.frame(RMSE_beta_BMA, RMSE_mu_BMA, RMSE_test_BMA)
-RMSE_BPM = data.frame(RMSE_beta_BPM, RMSE_mu_BPM, RMSE_test_BPM)
+RMSE_HPM = data.frame(beta = RMSE_beta_HPM, mu = RMSE_mu_HPM, test = RMSE_test_HPM)
+avg.rmse.hpm= apply(RMSE_HPM, 2, mean)
 
+RMSE_BMA = data.frame(beta = RMSE_beta_BMA, mu = RMSE_mu_BMA, test = RMSE_test_BMA)
+avg.rmse.bma = apply(RMSE_BMA, 2, mean)
+
+RMSE_BPM = data.frame(beta = RMSE_beta_BPM, mu = RMSE_mu_BPM, test = RMSE_test_BPM)
+avg.rmse.bpm = apply(RMSE_BMA, 2, mean)
 #diagnostic plots for MCMC convergence
 #diagnostics(app_best, type="pip")
 
@@ -921,9 +925,14 @@ for(i in 1:10){
 # Prepare for outputs
 
 #store RSME's in data frame
-RMSE_HPM = data.frame(RMSE_beta_HPM, RMSE_mu_HPM, RMSE_test_HPM)
-RMSE_BMA = data.frame(RMSE_beta_BMA, RMSE_mu_BMA, RMSE_test_BMA)
-RMSE_BPM = data.frame(RMSE_beta_BPM, RMSE_mu_BPM, RMSE_test_BPM)
+RMSE_HPM = data.frame(beta = RMSE_beta_HPM, mu = RMSE_mu_HPM, test = RMSE_test_HPM)
+avg.rmse.zs.hpm= apply(RMSE_HPM, 2, mean)
+
+RMSE_BMA = data.frame(beta = RMSE_beta_BMA, mu = RMSE_mu_BMA, test = RMSE_test_BMA)
+avg.rmse.zs.bma = apply(RMSE_BMA, 2, mean)
+
+RMSE_BPM = data.frame(beta = RMSE_beta_BPM, mu = RMSE_mu_BPM, test = RMSE_test_BPM)
+avg.rmse.zs.bpm = apply(RMSE_BMA, 2, mean)
 ```
 
 ```{r, Prob14.2, echo=FALSE, cache=TRUE}
@@ -1030,6 +1039,18 @@ app_best_BMA12 =   bas.lm(Y ~.-mu, data=df[1:50,],
 15.  Provide a summary of your simulation findings, with a table for the RMSEs for the different methods and parameters of interest $\beta$, $\mu$, $Y^{test}$ and proportion of time true model was selected.
 Does any one method seem to do better than the others or are some methods better for one estimation/prediction problem than the others?  Explain.
 For the energetic team - what about coverage?
+
+```{r}
+#Create columns for each set of beta, mu, and test RMSE
+methods = rbind(OLS = avg.rmse.df, AIC = avg_rmse_aic, BIC = avg_rmse_bic, HPM.MCMC = avg.rmse.hpm, BMA.MCMC = avg.rmse.bma, BPM.MCMC = avg.rmse.bpm, HPM.ZS = avg.rmse.zs.hpm, BMA.ZS = avg.rmse.zs.bma, BPM.ZS = avg.rmse.zs.bpm)
+
+#Create table for average RMSE's
+kable(methods, row.names = TRUE, caption = "Average RMSE's by Method")
+
+#Create columns for proportion true
+
+#Create table for proportion true across methods
+```
 
 
 
