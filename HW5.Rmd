@@ -19,9 +19,60 @@ library(knitr)
 # post on piazza for additional packages if there are wercker build errors due to missing packages
 ```
 
+
+```{r}
+## From http://www.cookbook-r.com/Graphs/Multiple_graphs_on_one_page_(ggplot2)/
+# Multiple plot function
+#
+# ggplot objects can be passed in ..., or to plotlist (as a list of ggplot objects)
+# - cols:   Number of columns in layout
+# - layout: A matrix specifying the layout. If present, 'cols' is ignored.
+#
+# If the layout is something like matrix(c(1,2,3,3), nrow=2, byrow=TRUE),
+# then plot 1 will go in the upper left, 2 will go in the upper right, and
+# 3 will go all the way across the bottom.
+#
+multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+  library(grid)
+
+  # Make a list from the ... arguments and plotlist
+  plots <- c(list(...), plotlist)
+
+  numPlots = length(plots)
+
+  # If layout is NULL, then use 'cols' to determine layout
+  if (is.null(layout)) {
+    # Make the panel
+    # ncol: Number of columns of plots
+    # nrow: Number of rows needed, calculated from # of cols
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                    ncol = cols, nrow = ceiling(numPlots/cols))
+  }
+
+ if (numPlots==1) {
+    print(plots[[1]])
+
+  } else {
+    # Set up the page
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+
+    # Make each plot, in the correct location
+    for (i in 1:numPlots) {
+      # Get the i,j matrix positions of the regions that contain this subplot
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                      layout.pos.col = matchidx$col))
+    }
+  }
+}
+```
+
+
 For this assignment we will explore simulation of data to compare methods for estimation and model selection.  To get started, refer to the code from Lab6 and simulate the datasets as described there.  Some "guideposts" for when to finish parts are provided within the problem set.
 
-1.  Add to the Lab6 code a second set of 100 datasets for testing (prediction) with $25$ observations, but where the $X$'s have the same correlation matrix as in the training data.   Provide a brief description of the model that generated the data and summary of the simulation study.  (ie dimensions, true $\beta$ etc, number of simulated datasets etc.). _(Finish Monday: most code is from lab; modification fo add test data should be straightforward)_
+1.  Add to the Lab6 code a second set of 100 datasets for testing (prediction) with $25$ observations, but where the $X$'s have the same correlation matrix as in the training data.   Provide a brief description of the model that generated the data and summary of the simulation study.  (ie dimensions, true $\beta$ etc, number of simulated datasets etc.).
 
 
 ANSWER:
@@ -35,7 +86,7 @@ Thirdly, we generated 75 $\times$ 4 matrix from standard normal distribution and
 Finally, we used cbind to combine X1, X2, X3 to get desired dataset and also computed Y and mu.
 
 In addition, we can see the similar pattern in both correlation heatmap of training data and testing data. In simulation, there are 5 variables(columns) have correlation to each other. In heat map, there are ranctangles around the diagnal indicating the same patterns.
-```{r}
+```{r Prob1, echo=FALSE}
 set.seed(8675309)
 # true parameters
 sigma = 2.5
@@ -111,11 +162,9 @@ Note for a vector of length $d$, RMSE is defined as
 $$
 RMSE(\hat{\theta}) = \sqrt{\sum_{i = 1}^{d} (\hat{\theta}_j - \theta_j)^2/d}
 $$
-_(Finish Monday as this code from lab can be directly used/modified for this)_
 
-```{r}
-a<-c(0,0,1,1.0)
-print(~a)
+
+```{r, Prob2, echo=FALSE}
 
 RMSE.beta  = rep(0,100)
 RMSE.mu  = rep(0,100)
@@ -153,20 +202,25 @@ kable(avg.rmse.df, caption = "Average RMSE's")
 #store RSME's in data frame
 rmse.df = data.frame(RMSE.beta, RMSE.mu, RMSE.test.pred)
 
+
 #histogram: beta
-ggplot(data = rmse.df[1], aes(x = rmse.df[1])) + theme_light() + labs(x = "RSME: Beta", y = "Frequency") + geom_histogram(fill = "lightblue", color = "darkblue") + geom_vline(xintercept = avg.rmse.beta, color = "red")
+p1<-ggplot(data = rmse.df[1], aes(x = rmse.df[1])) + theme_light() + labs(x = "RSME: Beta", y = "Count") + geom_histogram(fill = "lightblue", color = "darkblue",bins=30) + geom_vline(xintercept = avg.rmse.beta, color = "red")+labs(title="AIC Step Selection")
 
 #histogram: mu
-ggplot(data = rmse.df[2], aes(x = rmse.df[2])) + theme_light() + labs(x = "RMSE: Mu", y = "Frequency") + geom_histogram(fill = "khaki", color = "darkgoldenrod") + geom_vline(xintercept = avg.rmse.mu, color = "darkblue")
+p2<-ggplot(data = rmse.df[2], aes(x = rmse.df[2])) + theme_light() + labs(x = "RMSE: Mu", y = "Count") + geom_histogram(fill = "khaki", color = "darkgoldenrod", bins=20) + geom_vline(xintercept = avg.rmse.mu, color = "darkblue")
 
 #histogram: test prediction
-ggplot(data = rmse.df[3], aes(x = rmse.df[3])) + theme_light() + labs(x = "RMSE: Test Predictions", y = "Frequency") + geom_histogram(fill = "salmon", color = "orangered3") + geom_vline(xintercept = avg.rmse.test, color = "darkblue")
+p3<-ggplot(data = rmse.df[3], aes(x = rmse.df[3])) + theme_light() + labs(x = "RMSE: Test Predictions", y = "Count") + geom_histogram(fill = "salmon", color = "orangered3", bins=20) + geom_vline(xintercept = avg.rmse.test, color = "darkblue")
+
+multiplot(p1, p2, p3, cols=2)
+
+
 ```
+The average RMSE for $\beta^{true}$, $\mu^{true}$ and out of sample prediction are `r avg.rmse.df[1]`, `r avg.rmse.df[2]`, and `r avg.rmse.df[3]`, respectively.
 
+3.  Use AIC with either stepwise or all possible subsets to select a model and then use OLS to estimate the parameters under that model.  Using the estimates to compute the RMSE for a) estimating $\beta^{true}$, b) estimating $\mu^{true}$, and c) predicting $Y^{test}$. Present  histograms of the RMSE, and show where the  average RMSE falls on the plot.   Also report d) the number of times you select the true model using AIC out of the 100 simulations. 
 
-3.  Use AIC with either stepwise or all possible subsets to select a model and then use OLS to estimate the parameters under that model.  Using the estimates to compute the RMSE for a) estimating $\beta^{true}$, b) estimating $\mu^{true}$, and c) predicting $Y^{test}$. Present  histograms of the RMSE, and show where the  average RMSE falls on the plot.   Also report d) the number of times you select the true model using AIC out of the 100 simulations. _(A little more challenging: discuss with team  by Tuesday.  Figuring this out how to calculate RMSE with model selection will be needed for subsequent parts so start this early!.  Once this is done the  problem 5 should be easy!  Your write up should make it clear whether you used stepwise or all possible subsets)_ 
-
-```{r}
+```{r, Prob3, echo=FALSE}
 
 #rmse function
 rmse = function(y, ypred){
@@ -220,34 +274,57 @@ avg_rmse_mu = mean(RMSE_mu_aic)
 # average RMSE for testing data
 avg_rmse_test = mean(RMSE_test_aic)
 
+avg_rmse_aic<-data.frame(avg_rmse_beta,avg_rmse_mu,avg_rmse_test )
+
 #store RSME's in data frame
 rmse_df_aic = data.frame(RMSE_beta_aic, RMSE_mu_aic, RMSE_test_aic)
 #beta
-ggplot(data = rmse_df_aic[1], aes(x = rmse_df_aic[1])) + 
-  geom_histogram(fill = "lightblue", color = "darkblue")+
+p1<-ggplot(data = rmse_df_aic[1], aes(x = rmse_df_aic[1])) + 
+  geom_histogram(fill = "lightblue", color = "darkblue")+ labs(x = "RSME: Beta", y = "Count") +
   geom_vline(xintercept = avg_rmse_beta, color = "red")
 #mu
-ggplot(data = rmse_df_aic[2], aes(x = rmse_df_aic[2])) + 
-  geom_histogram(fill = "khaki", color = "darkgoldenrod")+
+p2<-ggplot(data = rmse_df_aic[2], aes(x = rmse_df_aic[2])) + 
+  geom_histogram(fill = "khaki", color = "darkgoldenrod")+ labs(x = "RSME: mu", y = "Count") +
   geom_vline(xintercept = avg_rmse_mu, color = "darkblue")
 #test
-ggplot(data = rmse_df_aic[3], aes(x = rmse_df_aic[3])) + 
-  geom_histogram(fill = "salmon", color = "orangered3")+
+p3<-ggplot(data = rmse_df_aic[3], aes(x = rmse_df_aic[3])) + 
+  geom_histogram(fill = "salmon", color = "orangered3")+ labs(x = "RSME: Test Prediction", y = "Count") +
   geom_vline(xintercept = avg_rmse_test, color = "darkblue")
 
+multiplot(p1, p2, p3, cols=2)
 
-count_true
+
 ```
+The number of "correct" models is `count_true`. The average RMSE for $\beta^{true}$, $\mu^{true}$ and out of sample prediction are `r avg_rmse_aic[1]`, `r avg_rmse_aic[2]`, and `r avg_rmse_aic[3]`, respectively.
 
 
 4.  Take a look at the summaries from the estimates under the best AIC model from the simulation that is equal to your team number.  Create confidence intervals for the $\beta$'s and comment on whether they include zero or not or the true value.
-```{r}
+```{r, Prob4, echo=FALSE}
 app_best_12 = step(ls[[12]], k=2,trace=0)
-summary(app_best_12)
-confint(app_best_12)
+beta_like = numeric(length(betatrue))
+names(beta_like) = names(betatrue)
+beta_like[names(coef(app_best_12))]<-coef(app_best_12)
+beta_like<-rbind(beta_like, rep(0,length(beta_like)))
+beta_like[2,names(coef(app_best_12))]<-confint(app_best_12)[,1]
+beta_like<-rbind(beta_like, rep(0,length(beta_like)))
+beta_like[3,names(coef(app_best_12))]<-confint(app_best_12)[,2]
+
+MCT<-rbind(beta_like,betatrue) 
+rownames(MCT)<-NULL
+colnames(MCT)<-NULL
+MCT<-as.data.frame(t(MCT))
+colnames(MCT)<-c("mean", "lci", "uci","truth")
+ggplot(MCT, aes(x=names(betatrue), y=mean),show.legend = TRUE) + 
+    geom_errorbar(aes(ymin=lci, ymax=uci), width=.1) +
+    geom_point()+geom_point(aes(y=truth),color="red")+labs(title="Stepwise AIC Model Selection (black=estimate, red=truth)", x="Coefficients", y="Value")
+
 ```
+
+From the figure we see that with the exception of coefficients 9, 13, 18 and 19, the confidence intervals include the true value of $\beta$. Coefficients 9 and 17 are nonzero although the true values are zero. Conversely, coefficeints 18 and 19 are not included in the best model although their true values are non-zero.
+
+
 5.   Use BIC with either stepwise or all possible subsets to select a model and then use OLS to estimate the parameters under that model.  Use the estimates to compute the RMSE for a) estimating $\beta^{true}$, b) $\mu^{true}$, and c) predicting $Y^{test}$. Present  histograms of the RMSE, and show where the average RMSE falls on the plot.   Also report d) the number of times you select the true model using BIC out of the 100 simulations. 
-```{r}
+```{r, Prob5, echo=FALSE}
 #create vector with the same length and same name of betatrue
 beta_like = numeric(length(betatrue))
 names(beta_like) = names(betatrue)
@@ -295,30 +372,55 @@ avg_rmse_mu = mean(RMSE_mu_bic)
 # average RMSE for testing data
 avg_rmse_test = mean(RMSE_test_bic)
 
+avg_rmse_bic<-data.frame(avg_rmse_beta,avg_rmse_mu,avg_rmse_test)
+
 #store RSME's in data frame
 rmse_df_bic = data.frame(RMSE_beta_bic, RMSE_mu_bic, RMSE_test_bic)
 #beta
-ggplot(data = rmse_df_bic[1], aes(x = rmse_df_bic[1])) + 
+p1<-ggplot(data = rmse_df_bic[1], aes(x = rmse_df_bic[1])) + 
   geom_histogram(fill = "lightblue", color = "darkblue")+
   geom_vline(xintercept = avg_rmse_beta, color = "red")
 #mu
-ggplot(data = rmse_df_bic[2], aes(x = rmse_df_bic[2])) + 
+p2<-ggplot(data = rmse_df_bic[2], aes(x = rmse_df_bic[2])) + 
   geom_histogram(fill = "khaki", color = "darkgoldenrod")+
   geom_vline(xintercept = avg_rmse_mu, color = "darkblue")
 #test
-ggplot(data = rmse_df_bic[3], aes(x = rmse_df_bic[3])) + 
+p3<-ggplot(data = rmse_df_bic[3], aes(x = rmse_df_bic[3])) + 
   geom_histogram(fill = "salmon", color = "orangered3")+
   geom_vline(xintercept = avg_rmse_test, color = "darkblue")
-count_true
+
+multiplot(p1,p2,p3, cols = 2)
 
 ```
+The number of "correct" models is `count_true`. The average RMSE for $\beta^{true}$, $\mu^{true}$ and out of sample prediction are `r avg_rmse_bic[1]`, `r avg_rmse_bic[2]`, and `r avg_rmse_bic[3]`, respectively.
+
 
 6.  Take a look at the summaries from the estimates under the best BIC model from the simulation that is equal to your team number.  Create confidence intervals for the $\beta$'s and comment on whether they include zero or not or the true value.
-```{r}
+```{r, Prob6, echo=FALSE}
 app_best_12 = step(ls[[12]], k=log(50),trace=0)
-summary(app_best_12)
-confint(app_best_12)
+beta_like = numeric(length(betatrue))
+names(beta_like) = names(betatrue)
+beta_like[names(coef(app_best_12))]<-coef(app_best_12)
+beta_like<-rbind(beta_like, rep(0,length(beta_like)))
+beta_like[2,names(coef(app_best_12))]<-confint(app_best_12)[,1]
+beta_like<-rbind(beta_like, rep(0,length(beta_like)))
+beta_like[3,names(coef(app_best_12))]<-confint(app_best_12)[,2]
+
+MCT<-rbind(beta_like,betatrue) 
+rownames(MCT)<-NULL
+colnames(MCT)<-NULL
+MCT<-as.data.frame(t(MCT))
+colnames(MCT)<-c("mean", "lci", "uci","truth")
+ggplot(MCT, aes(x=names(betatrue), y=mean),show.legend = TRUE) + 
+    geom_errorbar(aes(ymin=lci, ymax=uci), width=.1) +
+    geom_point()+geom_point(aes(y=truth),color="red")+labs(title="Stepwise BIC Model Selection (black=estimate, red=truth)", x="Coefficients", y="Value")
+
 ```
+
+From the figure we see that with the exception of coefficients 9, 13, 18 and 19, and 20, the confidence intervals include the true value of $\beta$. Coefficient 9 is nonzero although the true value is zero. Conversely, coefficeints 5, 18 and 19 are not included in the best model although their true values are non-zero.
+
+
+
 7. Theory (work individually and then combine to add group solution, try to complete by Wednesday before class)
 For the linear model, assume that the $X$ have been centered so that they all have mean 0.  For the linear model
 $$Y \sim N(1_n \beta_0 + X \beta, I_n/\phi)
@@ -431,14 +533,13 @@ $$ \propto \Big[1 + \dfrac{\beta^T\phi(X^TX)\beta}{n}\Big]^{-(p+1)/2}$$
 
 So, the prior on $\beta$ is proportional to a student-T with one degree of freedom, which is also a Cauchy distribution.
 
-_To speed up running time for the next set of problems, do the calculations for 9-13 in one named code chunk. then use separate code chunks to provide the necessary solutions for the different parts.  Test code using one or two simulated data sets, before running on all simulated data sets.  Once you are satisfied set cache=TRUE for the code chunk._
 
 10.  Using Bayesian variable selection under the $g$-prior with $g = n$ and a uniform prior distribution over models,  find the highest posterior probability model (HPM)  using `bas.lm` from library `BAS` (or other software). (If you use `BAS`, please download `BAS` version 1.4.3 from CRAN).  Using the mean of the appropriate posterior distribution under the HPM, find the average RMSE for a) estimating $\beta^{true}$, b) estimating $\mu^{true}$ and c) predicting $Y^{test}$.  Plot histograms of the RMSE and add the average RMSE to the plots.   What proportion of the time did you select the true model?   Your answer should describe whether you used enumeration or MCMC, number of iterations or models, etc.  If you used MCMC, check diagnostic plots to examin convergence.  
 Note `BAS` has functions to compute the fitted values `fitted` and predicted values `predict` for the HPM (see the vignette or help files), however, to find the posterior mean for the beta's for a given model, we need to extract the information from the object.  The following function can be use to do this. 
 
 
 
-```{r, echo=FALSE}
+```{r, Prob 10, echo=FALSE, cache=TRUE}
 coef.HPM = function(object) {
   best = which.max(object$postprobs)
   model = object$which[[best]]
@@ -551,13 +652,10 @@ for(i in 1:100){
   y_pred<-predict.bas(app_best,newdata=df[51:75,], estimator="BPM", prediction=TRUE)
   RMSE_test_BPM[i] = rmse(Y[51:75],y_pred$fit)
   
-  
-  print(i)
 }
 
 
 # Prepare for outputs
-
 
 #store RSME's in data frame
 RMSE_HPM = data.frame(RMSE_beta_HPM, RMSE_mu_HPM, RMSE_test_HPM)
@@ -565,31 +663,33 @@ RMSE_BMA = data.frame(RMSE_beta_BMA, RMSE_mu_BMA, RMSE_test_BMA)
 RMSE_BPM = data.frame(RMSE_beta_BPM, RMSE_mu_BPM, RMSE_test_BPM)
 
 #diagnostic plots for MCMC convergence
-diagnostics(app_best, type="pip")
+#diagnostics(app_best, type="pip")
 
 
 ```
 
-```{r, 10_output}
+```{r, 10_output, echo=FALSE}
 RMSE<-RMSE_HPM
 
 #beta
-ggplot(data = RMSE[1], aes(x = RMSE[1])) + 
+g1<-ggplot(data = RMSE[1], aes(x = RMSE[1])) + 
   geom_histogram(fill = "lightblue", color = "darkblue")+
   geom_vline(xintercept = mean(RMSE[,1]), color = "red") + labs(title="HPM: RMSE for beta ", x="RMSE", y="Count")
 #mu
-ggplot(data = RMSE[2], aes(x = RMSE[2])) + 
+g2<-ggplot(data = RMSE[2], aes(x = RMSE[2])) + 
   geom_histogram(fill = "khaki", color = "darkgoldenrod")+
   geom_vline(xintercept = mean(RMSE[,2]), color = "darkblue")+ labs(title="HPM: RMSE for mu ", x="RMSE", y="Count")
 #test
-ggplot(data = RMSE[3], aes(x = RMSE[3])) + 
+g3<-ggplot(data = RMSE[3], aes(x = RMSE[3])) + 
   geom_histogram(fill = "salmon", color = "orangered3")+
   geom_vline(xintercept = mean(RMSE[,3]), color = "darkblue")+ labs(title="HPM: RMSE for prediction", x="RMSE", y="Count")
-count_true
 
-count_true_hpm
+multiplot(g1,g2,g3,cols = 2)
 
 ```
+
+
+The number of times the "correct" model is selected is `r count_true_hpm`. 
 
 
 
@@ -614,19 +714,19 @@ confint(betas.bas)
 RMSE<-RMSE_BMA
 
 #beta
-ggplot(data = RMSE[1], aes(x = RMSE[1])) + 
+b1<-ggplot(data = RMSE[1], aes(x = RMSE[1])) + 
   geom_histogram(fill = "lightblue", color = "darkblue")+
   geom_vline(xintercept = mean(RMSE[,1]), color = "red")+ labs(title="BMA: RMSE for beta ", x="RMSE", y="Count")
 #mu
-ggplot(data = RMSE[2], aes(x = RMSE[2])) + 
+b2<-ggplot(data = RMSE[2], aes(x = RMSE[2])) + 
   geom_histogram(fill = "khaki", color = "darkgoldenrod")+
   geom_vline(xintercept = mean(RMSE[,2]), color = "darkblue")+ labs(title="BMA: RMSE for beta ", x="RMSE", y="Count")
 #test
-ggplot(data = RMSE[3], aes(x = RMSE[3])) + 
+b3<-ggplot(data = RMSE[3], aes(x = RMSE[3])) + 
   geom_histogram(fill = "salmon", color = "orangered3")+
   geom_vline(xintercept = mean(RMSE[,3]), color = "darkblue")+ labs(title="BMA: RMSE for beta ", x="RMSE", y="Count")
 
-
+multiplot(b1,b2,b3,cols = 2)
 
 rm(df)
 load(fname[12])
