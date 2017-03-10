@@ -514,7 +514,7 @@ $$ p(x_{i}^T\beta | Y, g) = \int p(x_{i}^T\beta | Y, g, \phi) p(\phi | Y, g) d\p
 
 $$ = \int (2\pi)^{-p/2} \begin{vmatrix}x_i\dfrac{g}{(g + 1)\phi}(X^TX)^{-1}x_i^t\end{vmatrix}^{-1/2}  exp(-\dfrac{(\beta - x_i\dfrac{g}{g + 1}\hat{\beta}_{OLS})^T (x_i\dfrac{g}{g + 1}\sigma^2(X^TX)^{-1}x_i^t)^{-1} (\beta - x_i\dfrac{g}{g + 1}\hat{\beta}_{OLS})}{2}) \dfrac{(\dfrac{\nu_{n}\hat{\sigma^2}}{2})}{\Gamma(\nu_{n}/2)}^{\nu_{n}/2} \phi^{\nu_{n}/2 - 1} exp(-\dfrac{\nu_{n}\hat{\sigma^2}}{2}) d\phi $$
 
-$$ \propto \int \phi^{p/2} \phi^{\nu_{n}/2 -1} exp(-\dfrac{(\beta - x_i\dfrac{g}{g + 1}\hat{\beta}_{OLS})^T (x_i^{-1}\dfrac{g + 1}{g }\phi(X^TX)(x_i^t)^{-1}) (\beta - x_i \dfrac{g}{g + 1}\hat{\beta}_{OLS})}{2}) exp(-\dfrac{\nu_{n}\hat{\sigma^2}}{2}) d\phi $$
+$$ \propto \int \phi^{p/2} \phi^{\nu_{n}/2 -1} exp(-\dfrac{(\beta - x_i\dfrac{g}{g + 1}\hat{\beta}_{OLS})^T (x_i^{-1}\dfrac{g + 1}{g }\phi(X^TX)(x_i^t)^{-1}) (\beta - x_i \dfrac{g}{g + 1}\hat{\beta}_{OLS})}{2}\phi) exp(-\dfrac{\nu_{n}\hat{\sigma^2}}{2}) d\phi $$
 
 $$ \propto \int \phi^{(p+\nu_{n})/2 -1} exp(-\dfrac{(\beta - x_i \dfrac{g}{g + 1}\hat{\beta}_{OLS})^T (x_i^{-1}\dfrac{g + 1}{g }(X^TX)(x_i^t)^{-1})  (\beta - x_i \dfrac{g}{g + 1}\hat{\beta}_{OLS}) + \nu_{n}\hat{\sigma^2}}{2}\phi) d\phi $$
 
@@ -528,6 +528,21 @@ $$ \propto \Big[1 + \dfrac{1}{\nu_{n}}\dfrac{(\beta - x_i\dfrac{g}{g + 1}\hat{\b
 c)
 
 $$ p(Y^{test}| Y, g) = \int p(Y^{test} | Y, g, \phi) p(\phi | Y, g) d\phi $$
+
+$$ = \int (2\pi)^{-p/2} \begin{vmatrix}\dfrac{1}{\phi} ( \dfrac{1}{n} + x_i\dfrac{g}{g + 1}(X^TX)^{-1}x_i^t + I_n)\end{vmatrix}^{-1/2}  exp(-\dfrac{(Y^{test} - \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta}_{OLS})^T (\dfrac{1}{\phi} ( \dfrac{1}{n} + x_i\dfrac{g}{g + 1}(X^TX)^{-1}x_i^t + I_n))^{-1} (Y^{test} - \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta}_{OLS})}{2}) \dfrac{(\dfrac{\nu_{n}\hat{\sigma^2}}{2})}{\Gamma(\nu_{n}/2)}^{\nu_{n}/2} \phi^{\nu_{n}/2 - 1} exp(-\dfrac{\nu_{n}\hat{\sigma^2}}{2}) d\phi $$
+
+$$ \propto \int \phi^{p/2} \phi^{\nu_{n}/2 -1} exp(-\dfrac{(Y^{test} - \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta}_{OLS})^T  ( \dfrac{1}{n} + x_i\dfrac{g}{g + 1}(X^TX)^{-1}x_i^t + I_n)^{-1} (Y^{test} - \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta}_{OLS})}{2}\phi) exp(-\dfrac{\nu_{n}\hat{\sigma^2}}{2}) d\phi $$
+
+$$ \propto \int \phi^{(p+\nu_{n})/2 -1} exp(-\dfrac{(Y^{test} - \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta}_{OLS})^T  ( \dfrac{1}{n} + x_i\dfrac{g}{g + 1}(X^TX)^{-1}x_i^t + I_n)^{-1} (Y^{test} - \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta}_{OLS}) + \nu_{n}\hat{\sigma^2} }{2}\phi) d\phi $$
+
+As in the previous two derivations, we know this is equal to the reciprocal of the proportional constant of the gamma:
+
+$$  = \Gamma(\dfrac{p + \nu_{n}}{2}) \Big[\dfrac{(Y^{test} - \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta}_{OLS})^T  ( \dfrac{1}{n} + x_i\dfrac{g}{g + 1}(X^TX)^{-1}x_i^t + I_n)^{-1} (Y^{test} - \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta}_{OLS}) + \nu_{n}\hat{\sigma^2} }{2}\Big]^{-(p + \nu_{n})/2} $$
+
+$$  \propto \Big[\dfrac{(Y^{test} - \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta}_{OLS})^T  ( \dfrac{1}{n} + x_i\dfrac{g}{g + 1}(X^TX)^{-1}x_i^t + I_n)^{-1} (Y^{test} - \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta}_{OLS}) + \nu_{n}\hat{\sigma^2}}{2}\Big]^{-(p + \nu_{n})/2} $$
+
+$$  \propto \Big[1 + \dfrac{1}{\nu_{n}} \dfrac{(Y^{test} - \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta}_{OLS})^T  ( \dfrac{1}{n} + x_i\dfrac{g}{g + 1}(X^TX)^{-1}x_i^t + I_n)^{-1} (Y^{test} - \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta}_{OLS})}{\hat{\sigma^2}}\Big]^{-(p + \nu_{n})/2} $$
+Again, this is proportional to a student-T with $\nu_{n}$ degrees of freedom.
 
 9. Let $\tau = 1/g$ and substitute that in the prior for $\beta$
 $$\beta \mid \beta_0, \phi \sim N(0, (X^TX)^{-1}/(\tau \phi))$$
