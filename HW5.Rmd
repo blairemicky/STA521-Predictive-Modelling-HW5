@@ -1,11 +1,9 @@
 ---
-title: 'HW5: Team 12'
+pdf_document: default
 author: "Thomas Fleming, Blaire Li, Marc D. Ryser, Hengqian Zhang"
 date: "Due March 10, 2016"
-output:
-html_notebook: default
-html_document: default
-pdf_document: default
+output: pdf_document
+title: 'HW5: Team 12'
 ---
 
 
@@ -76,8 +74,8 @@ For this assignment we will explore simulation of data to compare methods for es
 
 
 ANSWER:
-The true betas' we choose is the same as the betas' in lab6 which are {4,2,0,0,0,-1,0,1.5,0,0,0,1,0,0.5,0,0,0,0,-1,1,4}. We simulated 100 datasets and each with dimension 25 $\times$ 21. The procedure we use to generate the data is exactly the same as we did in lab 6. Considering the training data set, we wanted to simulate 100 datasets each with dimension  $75 \times  23$ (21 for beta plus Y and mu)
-For each dataset, first we generated  $ 75 \times 10$ from standard normal distribution.
+The true betas' we choose is the same as the betas' in lab6 which are {4,2,0,0,0,-1,0,1.5,0,0,0,1,0,0.5,0,0,0,0,-1,1,4}. We simulated 100 datasets and each with dimension 25 by 21. The procedure we use to generate the data is exactly the same as we did in lab 6. Considering the training data set, we wanted to simulate 100 datasets each with dimension  75 by 23 (21 for beta plus Y and mu)
+For each dataset, first we generated 75 by 10 from standard normal distribution.
 
 Secondly, we picked up the last 5 columns of the data we generated in step 1 and did matrix multiplication with {0.3,0.5,0.7,0.9,1.1} to get 75$\times$ 1 vector and  replicated it 5 times to get X1 with dimension 75 $\times$ 5
 
@@ -220,7 +218,7 @@ The average RMSE for $\beta^{true}$, $\mu^{true}$ and out of sample prediction a
 
 3.  Use AIC with either stepwise or all possible subsets to select a model and then use OLS to estimate the parameters under that model.  Using the estimates to compute the RMSE for a) estimating $\beta^{true}$, b) estimating $\mu^{true}$, and c) predicting $Y^{test}$. Present  histograms of the RMSE, and show where the  average RMSE falls on the plot.   Also report d) the number of times you select the true model using AIC out of the 100 simulations. 
 
-```{r, Prob3, echo=FALSE}
+```{r, Prob3, echo=FALSE, cache=TRUE}
 
 #rmse function
 rmse = function(y, ypred){
@@ -324,7 +322,7 @@ From the figure we see that with the exception of coefficients 9, 13, 18 and 19,
 
 
 5.   Use BIC with either stepwise or all possible subsets to select a model and then use OLS to estimate the parameters under that model.  Use the estimates to compute the RMSE for a) estimating $\beta^{true}$, b) $\mu^{true}$, and c) predicting $Y^{test}$. Present  histograms of the RMSE, and show where the average RMSE falls on the plot.   Also report d) the number of times you select the true model using BIC out of the 100 simulations. 
-```{r, Prob5, echo=FALSE}
+```{r, Prob5, echo=FALSE, cache=TRUE}
 #create vector with the same length and same name of betatrue
 beta_like = numeric(length(betatrue))
 names(beta_like) = names(betatrue)
@@ -526,8 +524,7 @@ $$  = \Gamma(\dfrac{p + \nu_{n}}{2}) \Big[\dfrac{(Y - (1_{n}\beta_{0} + X\beta))
 $$ \propto \Big[1 + \dfrac{1}{\nu_{n}}\dfrac{(Y - (1_{n}\beta_{0} + X\beta))^T (Y - (1_{n}\beta_{0} + X\beta))}{\hat{\sigma^2}}\Big]^{-(p+\nu_{n})/2} $$
 
 9. Let $\tau = 1/g$ and substitute that in the prior for $\beta$
-$$\beta \mid \beta_0, \phi \sim N(0, (X^TX)^{-1}/(\tau \phi))
-$$
+$$\beta \mid \beta_0, \phi \sim N(0, (X^TX)^{-1}/(\tau \phi))$$
 If $\tau \sim G(1/2, n/2)$, show that the prior on $\beta$ is a Cauchy Distribution 
 $$\beta \mid  \phi, \beta_0 \sim C(0,  (X^TX/n)^{-1}/\phi)$$
 _(a Cauchy distribution is a Student t with 1 df - see notes for density)_
@@ -550,6 +547,7 @@ $$ = \Gamma(\dfrac{p + 1}{2}) \Big[(\dfrac{n +(\beta^T\phi(X^TX)\beta)}{2})^{-(p
 $$ \propto \Big[1 + \dfrac{\beta^T\phi(X^TX)\beta}{n}\Big]^{-(p+1)/2}$$
 
 So, the prior on $\beta$ is proportional to a student-T with one degree of freedom, which is also a Cauchy distribution.
+
 
 
 10.  Using Bayesian variable selection under the $g$-prior with $g = n$ and a uniform prior distribution over models,  find the highest posterior probability model (HPM)  using `bas.lm` from library `BAS` (or other software). (If you use `BAS`, please download `BAS` version 1.4.3 from CRAN).  Using the mean of the appropriate posterior distribution under the HPM, find the average RMSE for a) estimating $\beta^{true}$, b) estimating $\mu^{true}$ and c) predicting $Y^{test}$.  Plot histograms of the RMSE and add the average RMSE to the plots.   What proportion of the time did you select the true model?   Your answer should describe whether you used enumeration or MCMC, number of iterations or models, etc.  If you used MCMC, check diagnostic plots to examin convergence.  
@@ -683,10 +681,11 @@ RMSE_BPM = data.frame(RMSE_beta_BPM, RMSE_mu_BPM, RMSE_test_BPM)
 #diagnostic plots for MCMC convergence
 #diagnostics(app_best, type="pip")
 
-
 ```
 
-```{r, 10_output, echo=FALSE}
+
+
+```{r, 10_output, echo=FALSE, cache=TRUE}
 RMSE<-RMSE_HPM
 
 #beta
@@ -711,16 +710,11 @@ The number of times the "correct" model is selected is `r count_true_hpm`.
 
 
 
-
-(Look at before Wednesday to be prepared to ask any questions)
-
 11.  Using the simulation that is equal to your team numbers, provide posterior summaries of the coefficient's of the HPM, such as Bayesian Confidence intervals.  
 Comment on whether the intervals contain the true value or zero.
 
 ```{r}
-betas.bas = coef(df.bas[[12]],n.models = 1) 
-betas.bas
-confint(betas.bas)
+
 
 ```
 
@@ -728,7 +722,7 @@ confint(betas.bas)
 12.  To incorporate model uncertainty we could use  Bayesian Model Averaging, rather than the highest probability model. Repeat 10 and 11 using BMA for estimating the quantities.
 
 
-```{r output12}
+```{r output12, echo=FALSE, cache=TRUE}
 RMSE<-RMSE_BMA
 
 #beta
@@ -738,13 +732,16 @@ b1<-ggplot(data = RMSE[1], aes(x = RMSE[1])) +
 #mu
 b2<-ggplot(data = RMSE[2], aes(x = RMSE[2])) + 
   geom_histogram(fill = "khaki", color = "darkgoldenrod")+
-  geom_vline(xintercept = mean(RMSE[,2]), color = "darkblue")+ labs(title="BMA: RMSE for beta ", x="RMSE", y="Count")
+  geom_vline(xintercept = mean(RMSE[,2]), color = "darkblue")+ labs(title="BMA: RMSE for mu ", x="RMSE", y="Count")
 #test
 b3<-ggplot(data = RMSE[3], aes(x = RMSE[3])) + 
   geom_histogram(fill = "salmon", color = "orangered3")+
-  geom_vline(xintercept = mean(RMSE[,3]), color = "darkblue")+ labs(title="BMA: RMSE for beta ", x="RMSE", y="Count")
+  geom_vline(xintercept = mean(RMSE[,3]), color = "darkblue")+ labs(title="BMA: RMSE for test prediction ", x="RMSE", y="Count")
 
 multiplot(b1,b2,b3,cols = 2)
+
+## confint
+
 
 rm(df)
 load(fname[12])
@@ -752,284 +749,267 @@ app_best_BMA12 = app_best = bas.lm(Y~.-mu, data=df[1:50,],
                     prior="g-prior", a=nrow(df[1:50,]), modelprior=uniform(),
                     method="MCMC", MCMC.iterations = 200000, thin = 20)
 
-print(confint.coef.bas(coef(app_best_BMA12)))
+
+beta_like<-confint.coef.bas(coef(app_best_BMA12))
+
+
+MCT<-as.data.frame(cbind(beta_like,betatrue) )
+colnames(MCT)<-c( "lci", "uci","post.mean", "truth")
+ggplot(MCT, aes(x=names(betatrue), y=post.mean),show.legend = TRUE) + 
+    geom_errorbar(aes(ymin=lci, ymax=uci), width=.1) +
+    geom_point()+geom_point(aes(y=truth),color="red")+labs(title="Bayesian Model Averaging (BMA) (black=estimate, red=truth)", x="Coefficients", y="Value")
+
 
 
 ```
 
 
-
+From The figure we see that the true values of all coefficeint are contained in the posterior credible intervals. 19 and 20 are, once more, problematic in the sense that there is a very large credible interval. 
 
 
 13.  If we wanted to select the model that is "closest" to BMA,  we could use the model whose predictions are closest to BMA  using squared error loss.  We can find the best predictive model `BPM` from `BAS` using the predict function with `estimator="BPM"`.   Repeat 10 and 11 using the Best Predictive Model, `BPM`.
 
-```{r, 13_output}
+```{r, 13_output, echo=FALSE, cache=TRUE}
 RMSE<-RMSE_BPM
 
 #beta
-ggplot(data = RMSE[1], aes(x = RMSE[1])) + 
+q1<-ggplot(data = RMSE[1], aes(x = RMSE[1])) + 
   geom_histogram(fill = "lightblue", color = "darkblue")+
   geom_vline(xintercept = mean(RMSE[,1]), color = "red")+ labs(title="BPM: RMSE for beta ", x="RMSE", y="Count")
 #mu
-ggplot(data = RMSE[2], aes(x = RMSE[2])) + 
+q2<-ggplot(data = RMSE[2], aes(x = RMSE[2])) + 
   geom_histogram(fill = "khaki", color = "darkgoldenrod")+
-  geom_vline(xintercept = mean(RMSE[,2]), color = "darkblue")+ labs(title="BPM: RMSE for beta ", x="RMSE", y="Count")
+  geom_vline(xintercept = mean(RMSE[,2]), color = "darkblue")+ labs(title="BPM: RMSE for mu ", x="RMSE", y="Count")
 #test
-ggplot(data = RMSE[3], aes(x = RMSE[3])) + 
+q3<-ggplot(data = RMSE[3], aes(x = RMSE[3])) + 
   geom_histogram(fill = "salmon", color = "orangered3")+
-  geom_vline(xintercept = mean(RMSE[,3]), color = "darkblue")+ labs(title="BPM: RMSE for beta ", x="RMSE", y="Count")
-count_true
+  geom_vline(xintercept = mean(RMSE[,3]), color = "darkblue")+ labs(title="BPM: RMSE for test prediction ", x="RMSE", y="Count")
 
+multiplot(q1,q2,q3,cols=2)
+
+### Confidence interval ####
 
 rm(df)
 load(fname[12])
 app_best_BMA12 = app_best = bas.lm(Y~.-mu, data=df[1:50,],
                     prior="g-prior", a=nrow(df[1:50,]), modelprior=uniform(),
                     method="MCMC", MCMC.iterations = 200000, thin = 20)
-
-
 
 count_true_bpm
 ```
 
 
 
-
-
 14.  Are the Bayesian estimates sensitive to the choice of prior?  Try 10-13 using the Zellner-Siow Cauchy prior (option `prior = "ZS-null"` in `bas.lm`)  
 
-```{r}
-#redo Q10
-library(BAS)
+```{r, Prob14.1, echo=FALSE, cache=TRUE}
+
+##############################
+## Bulk code for 10-12
+##############################
 #create vector with the same length and same name of betatrue
 beta_like = numeric(length(betatrue))
 names(beta_like) = names(betatrue)
 
+count_true_hpm<-0
+count_true_bpm<-0
 
-beta_model = betatrue
-beta_model[which(beta_model!=0)] = 1
+beta_model[which(betatrue!=0)] = 1
 
-#initialize RMSE vector
-RMSE_beta  = rep(0,100)
-RMSE_mu  = rep(0,100)
-RMSE_test  = rep(0,100)
+#initialize RMSE vector for HPM
+RMSE_beta_HPM  = rep(0,100)
+RMSE_mu_HPM  = rep(0,100)
+RMSE_test_HPM  = rep(0,100)
 
+#initialize RMSE vector for BMA
+RMSE_beta_BMA = rep(0,100)
+RMSE_mu_BMA  = rep(0,100)
+RMSE_test_BMA  = rep(0,100)
 
-df.bas = vector("list",100)
-for(i in 1:100){
+#initialize RMSE vector for BPM
+RMSE_beta_BPM = rep(0,100)
+RMSE_mu_BPM  = rep(0,100)
+RMSE_test_BPM  = rep(0,100)
+
+for(i in 1:10){
+  print(i)
   rm(df)
   load(fname[i])
-  df.bas[[i]] = bas.lm(Y ~.-mu, data=df[1:50,],
+  # Use BAS for model sampling (method=MCMC for speed; method=BAS for enumeration)
+  bas.lm(Y ~.-mu, data=df[1:50,],
                     prior="ZS-null", a=nrow(df[1:50,]), modelprior=uniform(),
                     method="MCMC", MCMC.iterations = 200000, thin = 20,
                     initprobs="marg-eplogp")
-  #get the HPM model
-  betas.bas = coef(df.bas[[i]], n.models=1)
-  betahat=betas.bas$postmean
-   
-  #the fitted values
-  muhat = fitted(df.bas[[i]], estimator="HPM")
-  #the predicted values
-  pred.df = predict(df.bas[[i]], newdata=df[51:75,], estimator="HPM")
-  predvalues = pred.df$fit
+  ###############################################
+  ## Work out the coefficients for the HPM ######
+  # create a copy of beta_like
+  beta_hpm = beta_like
+  # call the function coef.HPM to compute the betahat's for the HPM
+  hpm_summary<-coef.HPM(app_best)
+  # create beta_hpm of length(betatrue) with zeros for left out predictors
+  beta_hpm[hpm_summary$HPM+1] = hpm_summary$betahat
   
-  #count how many times choose the true model
-  coe_position = beta_like
-  coe_position[which(betas.bas$postmean != 0)] = 1
+  # Check if the HPM is identical with the true model in terms of variable selection
+  coe_position = (beta_hpm!=0)*1
   if(all(coe_position == beta_model)){
-    count_true = count_true+1
+    count_true_hpm = count_true_hpm+1
   }
   
+  ###############################################
+  ## Work out the coefficients for the BPM ######
+  # create a copy of beta_like
+  beta_bpm = beta_like
+  # call the function coef.HPM to compute the betahat's for the HPM
+  bpm_summary<-coef.BPM(app_best)
+  # create beta_hpm of length(betatrue) with zeros for left out predictors
+  beta_bpm[bpm_summary$HPM+1] = bpm_summary$betahat
   
-  ## for beta
-  RMSE_beta[i] = rmse(betatrue,betahat)
-  ## for mu
-  RMSE_mu[i] = rmse(mu[1:50], muhat) 
-  ## for testing data
-  RMSE_test[i] = rmse(Y[51:75],predvalues)    
-}
-
-```
-
-```{r}
-#redo Q11
-betas.bas = coef(df.bas[[12]],n.models = 1) 
-betas.bas
-confint(betas.bas)
-```
-
-```{r}
-#redo Q12
-library(BAS)
-#create vector with the same length and same name of betatrue
-beta_like = numeric(length(betatrue))
-names(beta_like) = names(betatrue)
-
-
-beta_model = betatrue
-beta_model[which(beta_model!=0)] = 1
-
-#initialize RMSE vector
-RMSE_beta  = rep(0,100)
-RMSE_mu  = rep(0,100)
-RMSE_test  = rep(0,100)
-
-
-df.bas = vector("list",100)
-for(i in 1:100){
-  rm(df)
-  load(fname[i])
-  df.bas[[i]] = bas.lm(Y ~.-mu, data=df[1:50,],
-                    prior="ZS-null", a=nrow(df[1:50,]), modelprior=uniform(),
-                    method="MCMC", MCMC.iterations = 200000, thin = 20,
-                    initprobs="marg-eplogp")
-  #get the BMA model
-  betas.bas = coef(df.bas[[i]])
-  betahat=betas.bas$postmean
-   
-  #the fitted values
-  muhat = fitted(df.bas[[i]], estimator="BMA")
-  #the predicted values
-  pred.df = predict(df.bas[[i]], newdata=df[51:75,], estimator="BMA")
-  predvalues = pred.df$fit
-  
-  #count how many times choose the true model
-  coe_position = beta_like
-  coe_position[which(betas.bas$postmean != 0)] = 1
+  # Check if the HPM is identical with the true model in terms of variable selection
+  coe_position = (beta_bpm!=0)*1
   if(all(coe_position == beta_model)){
-    count_true = count_true+1
+    count_true_bpm = count_true_bpm+1
   }
   
+  ###############################################
+  ## UPDATE THE RMSE VECTORS        ######
   
-  ## for beta
-  RMSE_beta[i] = rmse(betatrue,betahat)
-  ## for mu
-  RMSE_mu[i] = rmse(mu[1:50], muhat) 
-  ## for testing data
-  RMSE_test[i] = rmse(Y[51:75],predvalues)    
+  ## HPM: RMSE for beta_true (fitting)
+  RMSE_beta_HPM[i] = rmse(betatrue,beta_hpm)
+  ## HPM: RMSE for mu_true (fitting)
+  mu_fit<-fitted(app_best, estimator = "HPM")
+  RMSE_mu_HPM[i] = rmse(mu[1:50], mu_fit)
+  ## HPM: RMSE for Y_true (prediction on test data)
+  y_pred<-predict.bas(app_best,newdata=df[51:75,], estimator="HPM", prediction=TRUE)
+  RMSE_test_HPM[i] = rmse(Y[50:75],y_pred$fit)
+  
+  ## BMA: RMSE for beta_true (fitting)
+  RMSE_beta_BMA[i] = rmse(betatrue,coef(app_best)$postmean)
+  ## BMA: RMSE for mu_true (fitting)
+  mu_fit<-fitted(app_best, estimator = "BMA")
+  RMSE_mu_BMA[i] = rmse(mu[1:50], mu_fit)
+  ## BMA: RMSE for Y_true (prediction on test data)
+  y_pred<-predict.bas(app_best,newdata=df[51:75,], estimator="BMA", prediction=TRUE)
+  RMSE_test_BMA[i] = rmse(Y[51:75],y_pred$fit)
+  
+  ## BPM: RMSE for beta_true (fitting)
+  RMSE_beta_BPM[i] = rmse(betatrue,beta_bpm)
+  ## BPM: RMSE for mu_true (fitting)
+  mu_fit<-fitted(app_best, estimator = "BPM")
+  RMSE_mu_BPM[i] = rmse(mu[1:50], mu_fit)
+  ## BPM: RMSE for Y_true (prediction on test data)
+  y_pred<-predict.bas(app_best,newdata=df[51:75,], estimator="BPM", prediction=TRUE)
+  RMSE_test_BPM[i] = rmse(Y[51:75],y_pred$fit)
+  
 }
 
- #  average RMSE for estimating beta
-avg_rmse_beta = mean(RMSE_beta)
 
-#  average RMSE for estimating mu
-avg_rmse_mu = mean(RMSE_mu)
-
-# average RMSE for testing data
-avg_rmse_test = mean(RMSE_test)
+# Prepare for outputs
 
 #store RSME's in data frame
-rmse_df_bas = data.frame(RMSE_beta, RMSE_mu, RMSE_test)
+RMSE_HPM = data.frame(RMSE_beta_HPM, RMSE_mu_HPM, RMSE_test_HPM)
+RMSE_BMA = data.frame(RMSE_beta_BMA, RMSE_mu_BMA, RMSE_test_BMA)
+RMSE_BPM = data.frame(RMSE_beta_BPM, RMSE_mu_BPM, RMSE_test_BPM)
+```
+
+```{r, Prob14.2, echo=FALSE, cache=TRUE}
+### OUTPUT FOR 10
+
+RMSE<-RMSE_HPM
+
 #beta
-ggplot(data = rmse_df_bas[1], aes(x = rmse_df_bas[1])) + 
+g1<-ggplot(data = RMSE[1], aes(x = RMSE[1])) + 
   geom_histogram(fill = "lightblue", color = "darkblue")+
-  geom_vline(xintercept = avg_rmse_beta, color = "red")
+  geom_vline(xintercept = mean(RMSE[,1]), color = "red") + labs(title="HPM: RMSE for beta ", x="RMSE", y="Count")
 #mu
-ggplot(data = rmse_df_bas[2], aes(x = rmse_df_bas[2])) + 
+g2<-ggplot(data = RMSE[2], aes(x = RMSE[2])) + 
   geom_histogram(fill = "khaki", color = "darkgoldenrod")+
-  geom_vline(xintercept = avg_rmse_mu, color = "darkblue")
+  geom_vline(xintercept = mean(RMSE[,2]), color = "darkblue")+ labs(title="HPM: RMSE for mu ", x="RMSE", y="Count")
 #test
-ggplot(data = rmse_df_bas[3], aes(x = rmse_df_bas[3])) + 
+g3<-ggplot(data = RMSE[3], aes(x = RMSE[3])) + 
   geom_histogram(fill = "salmon", color = "orangered3")+
-  geom_vline(xintercept = avg_rmse_test, color = "darkblue")
+  geom_vline(xintercept = mean(RMSE[,3]), color = "darkblue")+ labs(title="HPM: RMSE for prediction", x="RMSE", y="Count")
 
-count_true
+multiplot(g1,g2,g3,cols = 2) 
+```
 
-#diagnostic plots for MCMC convergence
-diagnostics(df.bas[[12]], type="pip")
+```{r, Prob14.3, echo=FALSE}
+####  FOR 11
 
-##redo Q11
-betas.bas = coef(df.bas[[12]]) 
-betas.bas
-confint(betas.bas)
 
 ```
 
-```{r}
-#redo Q13
-library(BAS)
-#create vector with the same length and same name of betatrue
-beta_like = numeric(length(betatrue))
-names(beta_like) = names(betatrue)
+```{r, Prob14.4, echo=FALSE, cache=TRUE}
+# For Question 12
+RMSE<-RMSE_BMA
+
+#beta
+b1<-ggplot(data = RMSE[1], aes(x = RMSE[1])) + 
+  geom_histogram(fill = "lightblue", color = "darkblue")+
+  geom_vline(xintercept = mean(RMSE[,1]), color = "red")+ labs(title="BMA: RMSE for beta ", x="RMSE", y="Count")
+#mu
+b2<-ggplot(data = RMSE[2], aes(x = RMSE[2])) + 
+  geom_histogram(fill = "khaki", color = "darkgoldenrod")+
+  geom_vline(xintercept = mean(RMSE[,2]), color = "darkblue")+ labs(title="BMA: RMSE for mu ", x="RMSE", y="Count")
+#test
+b3<-ggplot(data = RMSE[3], aes(x = RMSE[3])) + 
+  geom_histogram(fill = "salmon", color = "orangered3")+
+  geom_vline(xintercept = mean(RMSE[,3]), color = "darkblue")+ labs(title="BMA: RMSE for test prediction ", x="RMSE", y="Count")
+
+multiplot(b1,b2,b3,cols = 2)
+
+## confint
 
 
-beta_model = betatrue
-beta_model[which(beta_model!=0)] = 1
-
-#initialize RMSE vector
-RMSE_beta  = rep(0,100)
-RMSE_mu  = rep(0,100)
-RMSE_test  = rep(0,100)
-
-
-df.bas = vector("list",100)
-for(i in 1:100){
-  rm(df)
-  load(fname[i])
-  df.bas[[i]] = bas.lm(Y ~.-mu, data=df[1:50,],
+rm(df)
+load(fname[12])
+app_best_BMA12 =   bas.lm(Y ~.-mu, data=df[1:50,],
                     prior="ZS-null", a=nrow(df[1:50,]), modelprior=uniform(),
                     method="MCMC", MCMC.iterations = 200000, thin = 20,
                     initprobs="marg-eplogp")
-  #get the BPM model
-  betas.bas = coef(df.bas[[i]])
-  betahat=betas.bas$postmean
-   
-  #the fitted values
-  muhat = fitted(df.bas[[i]], estimator="BPM")
-  #the predicted values
-  pred.df = predict(df.bas[[i]], newdata=df[51:75,], estimator="BPM")
-  predvalues = pred.df$fit
-  
-  #count how many times choose the true model
-  coe_position = beta_like
-  coe_position[which(betas.bas$postmean != 0)] = 1
-  if(all(coe_position == beta_model)){
-    count_true = count_true+1
-  }
-  
-  
-  ## for beta
-  RMSE_beta[i] = rmse(betatrue,betahat)
-  ## for mu
-  RMSE_mu[i] = rmse(mu[1:50], muhat) 
-  ## for testing data
-  RMSE_test[i] = rmse(Y[51:75],predvalues)    
-}
 
- #  average RMSE for estimating beta
-avg_rmse_beta = mean(RMSE_beta)
 
-#  average RMSE for estimating mu
-avg_rmse_mu = mean(RMSE_mu)
+beta_like<-confint.coef.bas(coef(app_best_BMA12))
 
-# average RMSE for testing data
-avg_rmse_test = mean(RMSE_test)
 
-#store RSME's in data frame
-rmse_df_bas = data.frame(RMSE_beta, RMSE_mu, RMSE_test)
+MCT<-as.data.frame(cbind(beta_like,betatrue) )
+colnames(MCT)<-c( "lci", "uci","post.mean", "truth")
+ggplot(MCT, aes(x=names(betatrue), y=post.mean),show.legend = TRUE) + 
+    geom_errorbar(aes(ymin=lci, ymax=uci), width=.1) +
+    geom_point()+geom_point(aes(y=truth),color="red")+labs(title="Bayesian Model Averaging (BMA) (black=estimate, red=truth)", x="Coefficients", y="Value")
+
+
+
+```
+
+
+```{r, Prob14.5, echo=FALSE, cache=TRUE}
+
+RMSE<-RMSE_BPM
+
 #beta
-ggplot(data = rmse_df_bas[1], aes(x = rmse_df_bas[1])) + 
+q1<-ggplot(data = RMSE[1], aes(x = RMSE[1])) + 
   geom_histogram(fill = "lightblue", color = "darkblue")+
-  geom_vline(xintercept = avg_rmse_beta, color = "red")
+  geom_vline(xintercept = mean(RMSE[,1]), color = "red")+ labs(title="BPM: RMSE for beta ", x="RMSE", y="Count")
 #mu
-ggplot(data = rmse_df_bas[2], aes(x = rmse_df_bas[2])) + 
+q2<-ggplot(data = RMSE[2], aes(x = RMSE[2])) + 
   geom_histogram(fill = "khaki", color = "darkgoldenrod")+
-  geom_vline(xintercept = avg_rmse_mu, color = "darkblue")
+  geom_vline(xintercept = mean(RMSE[,2]), color = "darkblue")+ labs(title="BPM: RMSE for mu ", x="RMSE", y="Count")
 #test
-ggplot(data = rmse_df_bas[3], aes(x = rmse_df_bas[3])) + 
+q3<-ggplot(data = RMSE[3], aes(x = RMSE[3])) + 
   geom_histogram(fill = "salmon", color = "orangered3")+
-  geom_vline(xintercept = avg_rmse_test, color = "darkblue")
+  geom_vline(xintercept = mean(RMSE[,3]), color = "darkblue")+ labs(title="BPM: RMSE for test prediction ", x="RMSE", y="Count")
 
-count_true
+multiplot(q1,q2,q3,cols=2)
 
-#diagnostic plots for MCMC convergence
-diagnostics(df.bas[[12]], type="pip")
+### Confidence interval ####
 
-##redo Q11
-betas.bas = coef(df.bas[[12]]) 
-betas.bas
-confint(betas.bas)
-
+rm(df)
+load(fname[12])
+app_best_BMA12 =   bas.lm(Y ~.-mu, data=df[1:50,],
+                    prior="ZS-null", a=nrow(df[1:50,]), modelprior=uniform(),
+                    method="MCMC", MCMC.iterations = 200000, thin = 20,
+                    initprobs="marg-eplogp")
+###????$$$
 ```
 
 15.  Provide a summary of your simulation findings, with a table for the RMSEs for the different methods and parameters of interest $\beta$, $\mu$, $Y^{test}$ and proportion of time true model was selected.
