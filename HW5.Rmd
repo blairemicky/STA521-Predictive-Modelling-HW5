@@ -678,7 +678,7 @@ ggplot(MCT, aes(x=names(betatrue), y=mean),show.legend = TRUE) +
   geom_errorbar(aes(ymin=lci, ymax=uci), width=.1) +
   geom_point()+geom_point(aes(y=truth),color="red")+labs(title="Posterior Confidence Intervals for HPM (black=estimate, red=truth)", x="Coefficients", y="Value")
 ```
-
+With the exception of x18, x19, and x20, all true coefficients are contained in the CI. With the exception of x18, the HPM included the right coefficients. Of note, x19 and x20 have very large CIs. It looks like there is something wrong here.
 
 12.  To incorporate model uncertainty we could use  Bayesian Model Averaging, rather than the highest probability model. Repeat 10 and 11 using BMA for estimating the quantities.
 
@@ -749,21 +749,30 @@ q3<-ggplot(data = RMSE[3], aes(x = RMSE[3])) +
 multiplot(q1,q2,q3,cols=3)
 
 ### Confidence interval ####
-
-rm(df)
+rm(df) 
 load(fname[12])
-app_best_BMA12 = app_best = bas.lm(Y~.-mu, data=df[1:50,],
-                    prior="g-prior", a=nrow(df[1:50,]), modelprior=uniform(),
-                    method="MCMC", MCMC.iterations = 200000, thin = 20)
+# Use BAS for model sampling (method=MCMC for speed; method=BAS for enumeration)
+app_best = bas.lm(Y~.-mu, data=df[1:50,],
+                  prior="g-prior", a=nrow(df[1:50,]), modelprior=uniform(),
+                  method="MCMC", MCMC.iterations = 200000, thin = 20)
+mod_bpm=rep(0,21)
+mod_bpm[coef.BPM(app_best)$HPM+1]<-1
+best_mod =     bas.lm(Y~.-mu, data=df[1:50,],a=nrow(df[1:50,]), prior="g-prior",n.models=1,bestmodel=mod_bpm )
 
-count_true_bpm
+MCT<-as.data.frame(cbind(confint(coef(best_mod)),betatrue) )
+
+colnames(MCT)<-c( "lci", "uci","mean","truth")
+ggplot(MCT, aes(x=names(betatrue), y=mean),show.legend = TRUE) + 
+  geom_errorbar(aes(ymin=lci, ymax=uci), width=.1) +
+  geom_point()+geom_point(aes(y=truth),color="red")+labs(title="Posterior Confidence Intervals for BPM (black=estimate, red=truth)", x="Coefficients", y="Value")
+
 ```
-
+Qualitatively the conclusions to draw here are exactly as in Problem 11.
 
 
 14.  Are the Bayesian estimates sensitive to the choice of prior?  Try 10-13 using the Zellner-Siow Cauchy prior (option `prior = "ZS-null"` in `bas.lm`)  
 
-```{r, Prob14.1, echo=FALSE, cache=TRUE}
+```{r, Prob14.1, echo=FALSE, cache=FALSE}
 
 ##############################
 ## Bulk code for 10-12
@@ -895,7 +904,23 @@ multiplot(g1,g2,g3,cols = 2)
 
 ```{r, Prob14.3, echo=FALSE}
 ####  FOR 11
+rm(df) 
+load(fname[12])
+# Use BAS for model sampling (method=MCMC for speed; method=BAS for enumeration)
+  bas.lm(Y ~.-mu, data=df[1:50,],
+                    prior="ZS-null", a=nrow(df[1:50,]), modelprior=uniform(),
+                    method="MCMC", MCMC.iterations = 200000, thin = 20,
+                    initprobs="marg-eplogp")
+mod_hpm=rep(0,21)
+mod_hpm[coef.HPM(app_best)$HPM+1]<-1
+best_mod =     bas.lm(Y~.-mu, data=df[1:50,],a=nrow(df[1:50,]), prior="ZS-null",n.models=1,bestmodel=mod_hpm )
 
+MCT<-as.data.frame(cbind(confint(coef(best_mod)),betatrue) )
+
+colnames(MCT)<-c( "lci", "uci","mean","truth")
+ggplot(MCT, aes(x=names(betatrue), y=mean),show.legend = TRUE) + 
+  geom_errorbar(aes(ymin=lci, ymax=uci), width=.1) +
+  geom_point()+geom_point(aes(y=truth),color="red")+labs(title="Posterior Confidence Intervals for HPM (black=estimate, red=truth)", x="Coefficients", y="Value")
 
 ```
 
@@ -960,17 +985,27 @@ q3<-ggplot(data = RMSE[3], aes(x = RMSE[3])) +
   geom_histogram(fill = "salmon", color = "orangered3")+
   geom_vline(xintercept = mean(RMSE[,3]), color = "darkblue")+ labs(title="BPM: RMSE for test prediction ", x="RMSE", y="Count")
 
-multiplot(q1,q2,q3,cols=2)
+multiplot(q1,q2,q3,cols=3)
 
 ### Confidence interval ####
 
-rm(df)
+rm(df) 
 load(fname[12])
-app_best_BMA12 =   bas.lm(Y ~.-mu, data=df[1:50,],
+# Use BAS for model sampling (method=MCMC for speed; method=BAS for enumeration)
+bas.lm(Y ~.-mu, data=df[1:50,],
                     prior="ZS-null", a=nrow(df[1:50,]), modelprior=uniform(),
                     method="MCMC", MCMC.iterations = 200000, thin = 20,
                     initprobs="marg-eplogp")
-###????$$$
+mod_bpm=rep(0,21)
+mod_bpm[coef.BPM(app_best)$HPM+1]<-1
+best_mod =bas.lm(Y~.-mu, data=df[1:50,],a=nrow(df[1:50,]), prior="g-prior",n.models=1,bestmodel=mod_bpm )
+
+MCT<-as.data.frame(cbind(confint(coef(best_mod)),betatrue) )
+
+colnames(MCT)<-c( "lci", "uci","mean","truth")
+ggplot(MCT, aes(x=names(betatrue), y=mean),show.legend = TRUE) + 
+  geom_errorbar(aes(ymin=lci, ymax=uci), width=.1) +
+  geom_point()+geom_point(aes(y=truth),color="red")+labs(title="Posterior Confidence Intervals for BPM (black=estimate, red=truth)", x="Coefficients", y="Value")
 ```
 
 15.  Provide a summary of your simulation findings, with a table for the RMSEs for the different methods and parameters of interest $\beta$, $\mu$, $Y^{test}$ and proportion of time true model was selected.
