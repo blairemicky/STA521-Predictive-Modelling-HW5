@@ -18,7 +18,7 @@ library(knitr)
 ```
 
 
-```{r}
+```{r, echo=FALSE}
 ## From http://www.cookbook-r.com/Graphs/Multiple_graphs_on_one_page_(ggplot2)/
 # Multiple plot function
 #
@@ -84,6 +84,7 @@ Thirdly, we generated 75 $\times$ 4 matrix from standard normal distribution and
 Finally, we used cbind to combine X1, X2, X3 to get desired dataset and also computed Y and mu.
 
 In addition, we can see the similar pattern in both correlation heatmap of training data and testing data. In simulation, there are 5 variables(columns) have correlation to each other. In heat map, there are ranctangles around the diagnal indicating the same patterns.
+
 ```{r Prob1, echo=FALSE}
 set.seed(422)
 # true parameters
@@ -164,7 +165,7 @@ RMSE(\hat{\theta}) = \sqrt{\sum_{i = 1}^{d} (\hat{\theta}_j - \theta_j)^2/d}
 $$
 
 
-```{r, Prob2, echo=FALSE}
+```{r, Prob2, echo=FALSE, message=FALSE, warning=FALSE}
 
 RMSE.beta  = rep(0,100)
 RMSE.mu  = rep(0,100)
@@ -216,11 +217,12 @@ multiplot(p1, p2, p3, cols=3)
 
 
 ```
+
 The average RMSE for $\beta^{true}$, $\mu^{true}$ and out of sample prediction are `r avg.rmse.df[1]`, `r avg.rmse.df[2]`, and `r avg.rmse.df[3]`, respectively.
 
 3.  Use AIC with either stepwise or all possible subsets to select a model and then use OLS to estimate the parameters under that model.  Using the estimates to compute the RMSE for a) estimating $\beta^{true}$, b) estimating $\mu^{true}$, and c) predicting $Y^{test}$. Present  histograms of the RMSE, and show where the  average RMSE falls on the plot.   Also report d) the number of times you select the true model using AIC out of the 100 simulations. 
 
-```{r, Prob3, echo=FALSE, cache=TRUE}
+```{r, Prob3, echo=FALSE, cache=TRUE, warning=FALSE, message=FALSE}
 
 #rmse function
 rmse = function(y, ypred){
@@ -296,10 +298,12 @@ multiplot(p1, p2, p3, cols=3)
 propto.aic = count_true/100
 
 ```
+
 The number of "correct" models is `count_true`. The average RMSE for $\beta^{true}$, $\mu^{true}$ and out of sample prediction are `r avg_rmse_aic[1]`, `r avg_rmse_aic[2]`, and `r avg_rmse_aic[3]`, respectively. The full distributions are found in the plots above.
 
 
 4.  Take a look at the summaries from the estimates under the best AIC model from the simulation that is equal to your team number.  Create confidence intervals for the $\beta$'s and comment on whether they include zero or not or the true value.
+
 ```{r, Prob4, echo=FALSE}
 app_best_12 = step(ls[[12]], k=2,trace=0)
 beta_like = numeric(length(betatrue))
@@ -325,7 +329,8 @@ From the figure we see that with the exception of coefficients  13, 18, 19 and 2
 
 
 5.   Use BIC with either stepwise or all possible subsets to select a model and then use OLS to estimate the parameters under that model.  Use the estimates to compute the RMSE for a) estimating $\beta^{true}$, b) $\mu^{true}$, and c) predicting $Y^{test}$. Present  histograms of the RMSE, and show where the average RMSE falls on the plot.   Also report d) the number of times you select the true model using BIC out of the 100 simulations. 
-```{r, Prob5, echo=FALSE, cache=TRUE}
+
+```{r, Prob5, echo=FALSE, cache=TRUE, message=FALSE, warning=FALSE}
 #create vector with the same length and same name of betatrue
 beta_like = numeric(length(betatrue))
 names(beta_like) = names(betatrue)
@@ -399,6 +404,7 @@ The number of "correct" models is `count_true`. The average RMSE for $\beta^{tru
 
 
 6.  Take a look at the summaries from the estimates under the best BIC model from the simulation that is equal to your team number.  Create confidence intervals for the $\beta$'s and comment on whether they include zero or not or the true value.
+
 ```{r, Prob6, echo=FALSE}
 app_best_12 = step(ls[[12]], k=log(50),trace=0)
 beta_like = numeric(length(betatrue))
@@ -499,7 +505,7 @@ Note `BAS` has functions to compute the fitted values `fitted` and predicted val
 
 
 
-```{r, Prob 10, echo=FALSE, cache=TRUE}
+```{r, Prob 10, echo=FALSE, cache=TRUE, warning=FALSE, message=FALSE}
 coef.HPM = function(object) {
   best = which.max(object$postprobs)
   model = object$which[[best]]
@@ -670,7 +676,7 @@ diagnostics(app_best, type="pip")
 11.  Using the simulation that is equal to your team numbers, provide posterior summaries of the coefficient's of the HPM, such as Bayesian Confidence intervals.  
 Comment on whether the intervals contain the true value or zero.
 
-```{r}
+```{r, Prob11, echo=FALSE}
 rm(df) 
 load(fname[12])
 # Use BAS for model sampling (method=MCMC for speed; method=BAS for enumeration)
