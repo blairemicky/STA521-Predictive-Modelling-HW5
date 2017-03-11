@@ -487,7 +487,11 @@ b) We have that  $\mu_i \, | \, Y \sim x_i^t \beta\, | \, Y$ and hence by basic 
 $$ \mu_i\,  |\,  Y \sim t_{n-1} \left(\frac{g}{1+g} x_i^t\hat{\beta}, \frac{g(n-1)}{1+g}\left(SSE-\frac{1}{1+g} \hat{\beta}^t (X^tX)^{-1}\hat{\beta}\right)x_i^t  (X^tX)^{-1} x_i\right)  $$
 
 
-c) Because  $$ Y^\ast | Y =  (1_n \beta_{0} + X^\ast \beta + \epsilon^\ast )| Y $$ is the sum of two dependent multivariate t-distributions and a Gaussian (for $\epsilon^\ast$), it no longer suffices to compute the mean and variance to characterize the distribution of $Y^\ast | Y$. TBC...
+c) From 7c) we know that  $ Y^\ast | Y, \phi =  (1_n \beta_{0} + X^\ast \beta + \epsilon^\ast )| Y$ has distribution
+$$Y^\ast|Y, \phi \sim \mathcal{N}\left(\bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta} ,  \dfrac{1}{\phi} \left( I_n\left(1+\dfrac{1}{n}\right) + X^\ast\dfrac{g}{g + 1}(X^TX)^{-1}X^{\ast t}  \right) \right).$$ 
+Furthermore, $\phi \, | \, Y \sim G(\nu/2, \nu \hat{\sigma}^2/2)$ with $\nu=n-1$ and $$
+\hat{\sigma}^2=(n-1)\left(SSE-\frac{1}{1+g} \hat{\beta}^t (X^tX)^{-1}\hat{\beta}\right).$$ It follows from the above theorem that $Y*|Y$ has a multivariate Student t distribution with
+$$ Y^\ast|Y \sim t_{n-1}\left(\bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta},  (n-1) \left( I_n\left(1+\dfrac{1}{n}\right) + X^\ast\dfrac{g}{g + 1}(X^TX)^{-1}X^{\ast t}\right)\left(SSE-\frac{1}{1+g} \hat{\beta}^t (X^tX)^{-1}\hat{\beta}\right)\right) $$
 
 9. Let $\tau = 1/g$ and substitute that in the prior for $\beta$
 $$\beta \mid \beta_0, \phi \sim N(0, (X^TX)^{-1}/(\tau \phi))$$
@@ -634,8 +638,7 @@ avg.rmse.bma = apply(RMSE_BMA, 2, mean)
 
 RMSE_BPM = data.frame(beta = RMSE_beta_BPM, mu = RMSE_mu_BPM, test = RMSE_test_BPM)
 avg.rmse.bpm = apply(RMSE_BMA, 2, mean)
-#diagnostic plots for MCMC convergence
-#diagnostics(app_best, type="pip")
+
 
 propto.hpm = count_true_hpm/100
 propto.bpm = count_true_bpm/100
@@ -643,7 +646,7 @@ propto.bpm = count_true_bpm/100
 
 
 
-```{r, 10_output, echo=FALSE, cache=TRUE}
+```{r, 10_output, echo=FALSE, cache=TRUE, message=FALSE, warning=FALSE}
 RMSE<-RMSE_HPM
 
 #beta
