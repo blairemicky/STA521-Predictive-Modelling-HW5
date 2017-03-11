@@ -876,7 +876,7 @@ for(i in 1:100){
   RMSE_mu_HPM[i] = rmse(df$mu[1:50], mu_fit)
   ## HPM: RMSE for Y_true (prediction on test data)
   y_pred<-predict.bas(app_best,newdata=df[51:75,], estimator="HPM", prediction=TRUE)
-  RMSE_test_HPM[i] = rmse(df$Y[50:75],y_pred$fit)
+  RMSE_test_HPM[i] = rmse(df$Y[51:75],y_pred$fit)
   
   ## BMA: RMSE for beta_true (fitting)
   RMSE_beta_BMA[i] = rmse(betatrue,coef(app_best)$postmean)
