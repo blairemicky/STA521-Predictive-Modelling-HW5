@@ -1049,7 +1049,7 @@ For the energetic team - what about coverage?
 
 ```{r, echo=FALSE}
 #Create columns for each set of beta, mu, and test RMSE
-methods = rbind(OLS = avg.rmse.df, AIC = avg_rmse_aic, BIC = avg_rmse_bic, HPM.MCMC = avg.rmse.hpm, BMA.MCMC = avg.rmse.bma, BPM.MCMC = avg.rmse.bpm, HPM.ZS = avg.rmse.zs.hpm, BMA.ZS = avg.rmse.zs.bma, BPM.ZS = avg.rmse.zs.bpm)
+methods = rbind(OLS = avg.rmse.df, AIC = avg_rmse_aic, BIC = avg_rmse_bic, HPM.ZG = avg.rmse.hpm, BMA.ZG = avg.rmse.bma, BPM.ZG = avg.rmse.bpm, HPM.ZS = avg.rmse.zs.hpm, BMA.ZS = avg.rmse.zs.bma, BPM.ZS = avg.rmse.zs.bpm)
 
 #Create table for average RMSE's
 kable(methods, row.names = TRUE, caption = "Average RMSE's by Method")
@@ -1064,7 +1064,7 @@ kable(proportions, col.names = "Proportion", row.names = TRUE, caption = "Propor
 
 
 
-## Appendix
+## Appendix: Doing the a
 
 7. Theory (work individually and then combine to add group solution, try to complete by Wednesday before class)
 For the linear model, assume that the $X$ have been centered so that they all have mean 0.  For the linear model
