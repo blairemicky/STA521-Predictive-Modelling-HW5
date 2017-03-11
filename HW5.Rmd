@@ -486,10 +486,14 @@ $$ \beta_0 \,  |\,  Y \sim t_{n-1} \left(\bar{Y}, \frac{n-1}{n}\left(SSE-\frac{1
 
 
 b) We have that  $\mu_i \, | \, Y \sim x_i^t \beta\, | \, Y$ and hence by basic results on linear transformations of Student t distributions we find
-$$ \mu_i\,  |\,  Y \sim t_{n-1} \left(\frac{g}{1+g} x_i^t\hat{\beta}, \frac{g(n-1)}{1+g}\left(SSE-\frac{1}{1+g} \hat{\beta}^t (X^tX)^{-1}\hat{\beta}\right)x_i^t  (X^tX)^{-1} x_i\right)  $$
+$$ \mu_i\,  |\,  Y \sim t_{n-1} \left(\frac{g}{1+g} x_i^t\hat{\beta}, \frac{g(n-1)}{1+g}\left(SSE-\frac{1}{1+g} \hat{\beta}^t (X^tX)^{-1}\hat{\beta}\right)x_i^t  (X^tX)^{-1} x_i\right).$$
 
 
-c) Because  $$ Y^\ast | Y =  (1_n \beta_{0} + X^\ast \beta + \epsilon^\ast )| Y $$ is the sum of two dependent multivariate t-distributions and a Gaussian (for $\epsilon^\ast$), it no longer suffices to compute the mean and variance to characterize the distribution of $Y^\ast | Y$. TBC...
+c) From 7c) we know that  $Y^\ast | Y, \phi =  (1_n \beta_{0} + X^\ast \beta + \epsilon^\ast )| Y$ has distribution
+$$Y^\ast|Y, \phi \sim \mathcal{N}\left(\bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta} ,  \dfrac{1}{\phi} \left( I_n\left(1+\dfrac{1}{n}\right) + X^\ast\dfrac{g}{g + 1}(X^TX)^{-1}X^{\ast t}  \right) \right).$$ 
+Furthermore, $\phi \, | \, Y \sim G(\nu/2, \nu \hat{\sigma}^2/2)$ with $\nu=n-1$ and $$
+\hat{\sigma}^2=(n-1)\left(SSE-\frac{1}{1+g} \hat{\beta}^t (X^tX)^{-1}\hat{\beta}\right).$$ It follows from the above theorem that $Y*|Y$ has a multivariate Student t distribution with
+$$ Y^\ast|Y \sim t_{n-1}\left(\bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta},  (n-1) \left( I_n\left(1+\dfrac{1}{n}\right) + X^\ast\dfrac{g}{g + 1}(X^TX)^{-1}X^{\ast t}\right)\left(SSE-\frac{1}{1+g} \hat{\beta}^t (X^tX)^{-1}\hat{\beta}\right)\right) $$
 
 9. Let $\tau = 1/g$ and substitute that in the prior for $\beta$
 $$\beta \mid \beta_0, \phi \sim N(0, (X^TX)^{-1}/(\tau \phi))$$
@@ -636,8 +640,7 @@ avg.rmse.bma = apply(RMSE_BMA, 2, mean)
 
 RMSE_BPM = data.frame(beta = RMSE_beta_BPM, mu = RMSE_mu_BPM, test = RMSE_test_BPM)
 avg.rmse.bpm = apply(RMSE_BMA, 2, mean)
-#diagnostic plots for MCMC convergence
-#diagnostics(app_best, type="pip")
+
 
 propto.hpm = count_true_hpm/100
 propto.bpm = count_true_bpm/100
@@ -645,7 +648,7 @@ propto.bpm = count_true_bpm/100
 
 
 
-```{r, 10_output, echo=FALSE, cache=TRUE}
+```{r, 10_output, echo=FALSE, cache=TRUE, message=FALSE, warning=FALSE}
 RMSE<-RMSE_HPM
 
 #beta
@@ -883,7 +886,7 @@ for(i in 1:100){
   RMSE_beta_BPM[i] = rmse(betatrue,beta_bpm)
   ## BPM: RMSE for mu_true (fitting)
   mu_fit<-fitted(app_best, estimator = "BPM")
-  RMSE_mu_BPM[i] = rmse(df$df$mu[1:50], mu_fit)
+  RMSE_mu_BPM[i] = rmse(df$mu[1:50], mu_fit)
   ## BPM: RMSE for Y_true (prediction on test data)
   y_pred<-predict.bas(app_best,newdata=df[51:75,], estimator="BPM", prediction=TRUE)
   RMSE_test_BPM[i] = rmse(df$Y[51:75],y_pred$fit)
@@ -1055,154 +1058,154 @@ kable(proportions, col.names = "Proportion", row.names = TRUE, caption = "Propor
 
 
 
-<!-- ## Appendix -->
+## Appendix
 
-<!-- 7. Theory (work individually and then combine to add group solution, try to complete by Wednesday before class) -->
-<!-- For the linear model, assume that the $X$ have been centered so that they all have mean 0.  For the linear model -->
-<!-- $$Y \sim N(1_n \beta_0 + X \beta, I_n/\phi) -->
-<!-- $$ -->
-<!-- using Zellner's $g$-prior for  $\beta$ with  -->
-<!-- $$\beta \mid \beta_0, \phi \sim N(0, g (X^TX)^{-1}/\phi) -->
-<!-- $$ -->
-<!-- and the improper independent Jeffrey's prior $$p(\beta_0, \phi) \propto 1/\phi$$ -->
-<!-- find the a) posterior distriubtion of $\beta \mid Y, g, \phi$, b) posterior distribution of $\mu_i = x^T_i \beta \mid Y, g, \phi$ and c) the posterior predictive distribution of $Y^{test} \mid Y, g, \phi$ as functions of the OLS/MLE summaries. _(you may use results in notes - just quote - or derive)_ -->
+7. Theory (work individually and then combine to add group solution, try to complete by Wednesday before class)
+For the linear model, assume that the $X$ have been centered so that they all have mean 0.  For the linear model
+$$Y \sim N(1_n \beta_0 + X \beta, I_n/\phi)
+$$
+using Zellner's $g$-prior for  $\beta$ with
+$$\beta \mid \beta_0, \phi \sim N(0, g (X^TX)^{-1}/\phi)
+$$
+and the improper independent Jeffrey's prior $$p(\beta_0, \phi) \propto 1/\phi$$
+find the a) posterior distriubtion of $\beta \mid Y, g, \phi$, b) posterior distribution of $\mu_i = x^T_i \beta \mid Y, g, \phi$ and c) the posterior predictive distribution of $Y^{test} \mid Y, g, \phi$ as functions of the OLS/MLE summaries. _(you may use results in notes - just quote - or derive)_
 
-<!-- ANSWER: a) By Bayes' theorem we have -->
-<!-- $$ p(\beta | Y, g, \phi) \propto p(Y | \beta, g, \phi) p(\beta | g, \phi) $$ -->
+ANSWER: a) By Bayes' theorem we have
+$$ p(\beta | Y, g, \phi) \propto p(Y | \beta, g, \phi) p(\beta | g, \phi) $$
 
-<!-- Since Y is independent of g and Zellner's g-prior for $\beta$ is actually independent of $\beta_{0}$, we can plug in the given distributions for Y and $\beta$: -->
+Since Y is independent of g and Zellner's g-prior for $\beta$ is actually independent of $\beta_{0}$, we can plug in the given distributions for Y and $\beta$:
 
-<!-- $= N(1_{n}\beta_{0} + X\beta, I_{n}/\phi,) N(0, g(X^tX)^{-1}/\phi)$ -->
+$= N(1_{n}\beta_{0} + X\beta, I_{n}/\phi,) N(0, g(X^tX)^{-1}/\phi)$
 
-<!-- $$\propto e^{-((y - (1_{n}\beta_{0} + X\beta))^T (I_{n}/\phi)^{-1} (y - (1_{n}\beta_{0} + X\beta)))/2 } e^{- \beta^t (g(X^TX)^{-1}/\phi)^{-1} \beta/2} $$ -->
+$$\propto e^{-((y - (1_{n}\beta_{0} + X\beta))^T (I_{n}/\phi)^{-1} (y - (1_{n}\beta_{0} + X\beta)))/2 } e^{- \beta^t (g(X^TX)^{-1}/\phi)^{-1} \beta/2} $$
 
-<!-- $$\propto e^{- \dfrac{1}{2\sigma^2}((y - (1_{n}\beta_{0} + X\beta))^T(y - (1_{n}\beta_{0} + X\beta))) } e^{- \dfrac{1}{2 \sigma^2} \beta^t(X^TX)/g \beta} $$ -->
+$$\propto e^{- \dfrac{1}{2\sigma^2}((y - (1_{n}\beta_{0} + X\beta))^T(y - (1_{n}\beta_{0} + X\beta))) } e^{- \dfrac{1}{2 \sigma^2} \beta^t(X^TX)/g \beta} $$
 
-<!-- $$ \propto e^{- \dfrac{1}{2 \sigma^2} (y^T y - 2\beta^TX^Ty - \beta^TX^TX\beta - 2_n\beta_{0}^Ty + 1_{n}\beta_{0}1_{n}\beta_{0} + \beta^T((X^TX)/g)\beta) } = \beta^T A \beta - 2\beta B + C $$ -->
+$$ \propto e^{- \dfrac{1}{2 \sigma^2} (y^T y - 2\beta^TX^Ty - \beta^TX^TX\beta - 2_n\beta_{0}^Ty + 1_{n}\beta_{0}1_{n}\beta_{0} + \beta^T((X^TX)/g)\beta) } = \beta^T A \beta - 2\beta B + C $$
 
-<!-- where $$ A = \dfrac{(1 + g) X^T X}{g \sigma^2} $$, $$ B = \dfrac{X^T y}{\sigma^2} $$, and $$ c = c(y, \beta_{0}) $$ -->
+where $$ A = \dfrac{(1 + g) X^T X}{g \sigma^2} $$, $$ B = \dfrac{X^T y}{\sigma^2} $$, and $$ c = c(y, \beta_{0}) $$
 
-<!-- Since c is not a function of $\beta$, we can leave it out of the following proportion and rewrite the above in terms of A and B as, -->
+Since c is not a function of $\beta$, we can leave it out of the following proportion and rewrite the above in terms of A and B as,
 
-<!-- $$ e^{- \dfrac{1}{2} (\beta^T A \beta - 2 \beta B)} $$ -->
+$$ e^{- \dfrac{1}{2} (\beta^T A \beta - 2 \beta B)} $$
 
-<!-- While completing the square in this situation is tedious, we can use knowledge of the strategy for the univariate normal, outlined on page 70 of Hoff, where it is easier to calculate the posterior mean and variance. It can be shown that the formulas for the posterior mean and variance also apply to the multivariate case, and so we know that the posterior mean is equal to $$ \dfrac{A}{B} $$ and the posterior variance is equal to $$ \dfrac{1}{A} $$. If we expand these equations out, using the right-hand side of equations A and B, and simplify, we find that we have a normal distribution with: -->
+While completing the square in this situation is tedious, we can use knowledge of the strategy for the univariate normal, outlined on page 70 of Hoff, where it is easier to calculate the posterior mean and variance. It can be shown that the formulas for the posterior mean and variance also apply to the multivariate case, and so we know that the posterior mean is equal to $$ \dfrac{A}{B} $$ and the posterior variance is equal to $$ \dfrac{1}{A} $$. If we expand these equations out, using the right-hand side of equations A and B, and simplify, we find that we have a normal distribution with:
 
 
-<!-- $$Var[\beta | Y, g, \phi] = \dfrac{g}{g + 1}\sigma^2(X^tX)^{-1}$$ -->
+$$Var[\beta | Y, g, \phi] = \dfrac{g}{g + 1}\sigma^2(X^tX)^{-1}$$
 
-<!-- $$E[\beta | Y, g, \phi] = \dfrac{g}{g + 1}(X^TX)^{-1}X^T Y= \frac{g}{1+g}\hat{\beta} $$ -->
+$$E[\beta | Y, g, \phi] = \dfrac{g}{g + 1}(X^TX)^{-1}X^T Y= \frac{g}{1+g}\hat{\beta} $$
 
-<!-- In summary, we find that $$ \beta | Y, \phi, g \sim \mathcal{N}\left(\frac{g}{1+g}\hat{\beta},  \frac{g}{1+g}(X^tX)^{-1}\phi^{-1}\right)$$ -->
+In summary, we find that $$ \beta | Y, \phi, g \sim \mathcal{N}\left(\frac{g}{1+g}\hat{\beta},  \frac{g}{1+g}(X^tX)^{-1}\phi^{-1}\right)$$
 
 
-<!-- b) We note that $$ \mu_{i} = x_{i}^t\beta | Y, g, \phi $$ is an affine transformation of a Gaussian, and hence by standard results (see, e.g.,  the book by Christensen on linear models), we know that $\mu_i$ is normally distributed as : $$ \mu_{i}\sim \mathcal{N}\left( x_i \dfrac{g}{1+g}\hat{\beta}, \phi^{-1}\dfrac{g}{1+g}x_i (X^TX)^{-1} x_i^t  \right).$$ -->
+b) We note that $$ \mu_{i} = x_{i}^t\beta | Y, g, \phi $$ is an affine transformation of a Gaussian, and hence by standard results (see, e.g.,  the book by Christensen on linear models), we know that $\mu_i$ is normally distributed as : $$ \mu_{i}\sim \mathcal{N}\left( x_i \dfrac{g}{1+g}\hat{\beta}, \phi^{-1}\dfrac{g}{1+g}x_i (X^TX)^{-1} x_i^t  \right).$$
 
-<!-- Note: In the derivations below, we replced "test" by a $*$ for the sake of simplicity. -->
+Note: In the derivations below, we replced "test" by a $*$ for the sake of simplicity.
 
-<!-- c) $$ E[Y^\ast | Y, g, \phi] = E[ 1_n \beta_{0} + X^\ast \beta + \epsilon^\ast | Y, g, \phi]$$ -->
+c) $$ E[Y^\ast | Y, g, \phi] = E[ 1_n \beta_{0} + X^\ast \beta + \epsilon^\ast | Y, g, \phi]$$
 
-<!-- $$ = E[ 1_n \beta_{0} | Y, g, \phi] + E[X^\ast\beta | Y, g, \phi] + E[\epsilon^\ast | Y, g, \phi] $$ -->
+$$ = E[ 1_n \beta_{0} | Y, g, \phi] + E[X^\ast\beta | Y, g, \phi] + E[\epsilon^\ast | Y, g, \phi] $$
 
-<!-- $$ = \bar{Y} + x_i \dfrac{g}{1 + g} \hat{\beta} + 0$$ -->
+$$ = \bar{Y} + x_i \dfrac{g}{1 + g} \hat{\beta} + 0$$
 
-<!-- $$ = \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta} $$ -->
+$$ = \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta} $$
 
-<!-- For the calculation of the variance, we note that the $\beta_0$ and $\beta$ are independent random variables conditioned on $Y$ and $\phi$, and $\epsilon^\ast$ is independent of any past observation and hence independent of the model coefficients. Therefore, we can write -->
-<!-- $$Var[Y^\ast | Y, g, \phi] =  Var[ 1_n \beta_{0} + X^\ast \beta + \epsilon^\ast  | Y, g, \phi] $$ -->
+For the calculation of the variance, we note that the $\beta_0$ and $\beta$ are independent random variables conditioned on $Y$ and $\phi$, and $\epsilon^\ast$ is independent of any past observation and hence independent of the model coefficients. Therefore, we can write
+$$Var[Y^\ast | Y, g, \phi] =  Var[ 1_n \beta_{0} + X^\ast \beta + \epsilon^\ast  | Y, g, \phi] $$
 
-<!-- $$ = Var[1_n \beta_{0} | Y, g, \phi] + Var[X \beta | Y, g, \phi] + Var[\epsilon^ | Y, g, \phi] $$ -->
+$$ = Var[1_n \beta_{0} | Y, g, \phi] + Var[X \beta | Y, g, \phi] + Var[\epsilon^ | Y, g, \phi] $$
 
-<!-- $$ = \dfrac{I_n}{n \phi} + x_i\dfrac{g}{g + 1}\phi^{-1}(X^TX)^{-1}x_i^t + \dfrac{I_n}{\phi}$$ -->
+$$ = \dfrac{I_n}{n \phi} + x_i\dfrac{g}{g + 1}\phi^{-1}(X^TX)^{-1}x_i^t + \dfrac{I_n}{\phi}$$
 
-<!-- $$ = \dfrac{1}{\phi} \left( I_n\left(1+\dfrac{1}{n}\right) + x_i\dfrac{g}{g + 1}(X^TX)^{-1}x_i^t  \right) $$ -->
+$$ = \dfrac{1}{\phi} \left( I_n\left(1+\dfrac{1}{n}\right) + x_i\dfrac{g}{g + 1}(X^TX)^{-1}x_i^t  \right) $$
 
 
-<!-- 8. What are the corresponding distributions in 7) unconditional on $\phi$?  (hint recall theorem from class)  Are $\beta_0$ and $\beta$ still independent?  Explain. -->
+8. What are the corresponding distributions in 7) unconditional on $\phi$?  (hint recall theorem from class)  Are $\beta_0$ and $\beta$ still independent?  Explain.
 
-<!-- ANSWER: First we take the shortcut, and then we do the actual calculations.  -->
+ANSWER: First we take the shortcut, and then we do the actual calculations.
 
-<!-- SHORTCUT VERSION: -->
-<!-- a) From the theorem for the marginal distribution of a Normal-Gamma, we know that if  -->
+SHORTCUT VERSION:
+a) From the theorem for the marginal distribution of a Normal-Gamma, we know that if
 
-<!-- a) -->
+a)
 
-<!-- $$ p(\beta | Y, g) = \int p(\beta | Y, g, \phi) p(\phi | Y, g) d\phi $$ -->
-<!-- $$ = \int (2\pi)^{-p/2} \begin{vmatrix}\dfrac{g}{(g + 1)\phi}(X^TX)^{-1}\end{vmatrix}^{-1/2}  exp(-\dfrac{(\beta - \dfrac{g}{g + 1}\hat{\beta}_{OLS})^T (\dfrac{g}{g + 1}\sigma^2(X^TX)^{-1})^{-1} (\beta - \dfrac{g}{g + 1}\hat{\beta}_{OLS})}{2}) \dfrac{(\dfrac{\nu_{n}\hat{\sigma^2}}{2})}{\Gamma(\nu_{n}/2)}^{\nu_{n}/2} \phi^{\nu_{n}/2 - 1} exp(-\dfrac{\nu_{n}\hat{\sigma^2}}{2}) d\phi $$ -->
+$$ p(\beta | Y, g) = \int p(\beta | Y, g, \phi) p(\phi | Y, g) d\phi $$
+$$ = \int (2\pi)^{-p/2} \begin{vmatrix}\dfrac{g}{(g + 1)\phi}(X^TX)^{-1}\end{vmatrix}^{-1/2}  exp(-\dfrac{(\beta - \dfrac{g}{g + 1}\hat{\beta}_{OLS})^T (\dfrac{g}{g + 1}\sigma^2(X^TX)^{-1})^{-1} (\beta - \dfrac{g}{g + 1}\hat{\beta}_{OLS})}{2}) \dfrac{(\dfrac{\nu_{n}\hat{\sigma^2}}{2})}{\Gamma(\nu_{n}/2)}^{\nu_{n}/2} \phi^{\nu_{n}/2 - 1} exp(-\dfrac{\nu_{n}\hat{\sigma^2}}{2}) d\phi $$
 
-<!-- $$ \propto \int \phi^{p/2} \phi^{\nu_{n}/2 -1} exp(-\dfrac{(\beta - \dfrac{g}{g + 1}\hat{\beta}_{OLS})^T (\dfrac{g + 1}{g }\phi(X^TX)) (\beta - \dfrac{g}{g + 1}\hat{\beta}_{OLS})}{2}) exp(-\dfrac{\nu_{n}\hat{\sigma^2}}{2}) d\phi $$ -->
+$$ \propto \int \phi^{p/2} \phi^{\nu_{n}/2 -1} exp(-\dfrac{(\beta - \dfrac{g}{g + 1}\hat{\beta}_{OLS})^T (\dfrac{g + 1}{g }\phi(X^TX)) (\beta - \dfrac{g}{g + 1}\hat{\beta}_{OLS})}{2}) exp(-\dfrac{\nu_{n}\hat{\sigma^2}}{2}) d\phi $$
 
-<!-- $$ \propto \int \phi^{(p+\nu_{n})/2 -1} exp(-\dfrac{(\beta - \dfrac{g}{g + 1}\hat{\beta}_{OLS})^T (\dfrac{g + 1}{g }(X^TX))  (\beta - \dfrac{g}{g + 1}\hat{\beta}_{OLS}) + \nu_{n}\hat{\sigma^2}}{2}\phi) d\phi $$ -->
+$$ \propto \int \phi^{(p+\nu_{n})/2 -1} exp(-\dfrac{(\beta - \dfrac{g}{g + 1}\hat{\beta}_{OLS})^T (\dfrac{g + 1}{g }(X^TX))  (\beta - \dfrac{g}{g + 1}\hat{\beta}_{OLS}) + \nu_{n}\hat{\sigma^2}}{2}\phi) d\phi $$
 
-<!-- This is the kernel of a gamma and we know that it is equal to the reciprocal of its proportional constant: -->
+This is the kernel of a gamma and we know that it is equal to the reciprocal of its proportional constant:
 
-<!-- $$  = \Gamma(\dfrac{p + \nu_{n}}{2}) \Big[\dfrac{(\beta - \dfrac{g}{g + 1}\hat{\beta}_{OLS})^T (\dfrac{g + 1}{g }(X^TX))  (\beta - \dfrac{g}{g + 1}\hat{\beta}_{OLS}) + \nu_{n}\hat{\sigma^2}}{2}\Big]^{-(p + \nu_{n})/2} $$ -->
-<!-- $$ \propto \Big[(\beta - \dfrac{g}{g + 1}\hat{\beta}_{OLS})^T (\dfrac{g + 1}{g }(X^TX))  (\beta - \dfrac{g}{g + 1}\hat{\beta}_{OLS}) + \nu_{n}\hat{\sigma^2}\Big]^{-(p + \nu_{n})/2} $$ -->
+$$  = \Gamma(\dfrac{p + \nu_{n}}{2}) \Big[\dfrac{(\beta - \dfrac{g}{g + 1}\hat{\beta}_{OLS})^T (\dfrac{g + 1}{g }(X^TX))  (\beta - \dfrac{g}{g + 1}\hat{\beta}_{OLS}) + \nu_{n}\hat{\sigma^2}}{2}\Big]^{-(p + \nu_{n})/2} $$
+$$ \propto \Big[(\beta - \dfrac{g}{g + 1}\hat{\beta}_{OLS})^T (\dfrac{g + 1}{g }(X^TX))  (\beta - \dfrac{g}{g + 1}\hat{\beta}_{OLS}) + \nu_{n}\hat{\sigma^2}\Big]^{-(p + \nu_{n})/2} $$
 
-<!-- $$ \propto \Big[1 + \dfrac{1}{\nu_{n}}\dfrac{(\beta - \dfrac{g}{g + 1}\hat{\beta}_{OLS})^T (\dfrac{g + 1}{g }(X^TX))  (\beta - \dfrac{g}{g + 1}\hat{\beta}_{OLS})}{\hat{\sigma^2}}\Big]^{-(p+\nu_{n})/2} $$ -->
+$$ \propto \Big[1 + \dfrac{1}{\nu_{n}}\dfrac{(\beta - \dfrac{g}{g + 1}\hat{\beta}_{OLS})^T (\dfrac{g + 1}{g }(X^TX))  (\beta - \dfrac{g}{g + 1}\hat{\beta}_{OLS})}{\hat{\sigma^2}}\Big]^{-(p+\nu_{n})/2} $$
 
-<!-- This is proportional to a Student-T distribution with $\nu_{n}$ degrees of freedom. -->
+This is proportional to a Student-T distribution with $\nu_{n}$ degrees of freedom.
 
-<!-- b) -->
+b)
 
-<!-- $$ p(x_{i}^T\beta | Y, g) = \int p(x_{i}^T\beta | Y, g, \phi) p(\phi | Y, g) d\phi $$ -->
+$$ p(x_{i}^T\beta | Y, g) = \int p(x_{i}^T\beta | Y, g, \phi) p(\phi | Y, g) d\phi $$
 
-<!-- $$ = \int (2\pi)^{-p/2} \begin{vmatrix}x_i\dfrac{g}{(g + 1)\phi}(X^TX)^{-1}x_i^t\end{vmatrix}^{-1/2}  exp(-\dfrac{(\beta - x_i\dfrac{g}{g + 1}\hat{\beta}_{OLS})^T (x_i\dfrac{g}{g + 1}\sigma^2(X^TX)^{-1}x_i^t)^{-1} (\beta - x_i\dfrac{g}{g + 1}\hat{\beta}_{OLS})}{2}) \dfrac{(\dfrac{\nu_{n}\hat{\sigma^2}}{2})}{\Gamma(\nu_{n}/2)}^{\nu_{n}/2} \phi^{\nu_{n}/2 - 1} exp(-\dfrac{\nu_{n}\hat{\sigma^2}}{2}) d\phi $$ -->
+$$ = \int (2\pi)^{-p/2} \begin{vmatrix}x_i\dfrac{g}{(g + 1)\phi}(X^TX)^{-1}x_i^t\end{vmatrix}^{-1/2}  exp(-\dfrac{(\beta - x_i\dfrac{g}{g + 1}\hat{\beta}_{OLS})^T (x_i\dfrac{g}{g + 1}\sigma^2(X^TX)^{-1}x_i^t)^{-1} (\beta - x_i\dfrac{g}{g + 1}\hat{\beta}_{OLS})}{2}) \dfrac{(\dfrac{\nu_{n}\hat{\sigma^2}}{2})}{\Gamma(\nu_{n}/2)}^{\nu_{n}/2} \phi^{\nu_{n}/2 - 1} exp(-\dfrac{\nu_{n}\hat{\sigma^2}}{2}) d\phi $$
 
-<!-- $$ \propto \int \phi^{p/2} \phi^{\nu_{n}/2 -1} exp(-\dfrac{(\beta - x_i\dfrac{g}{g + 1}\hat{\beta}_{OLS})^T (x_i^{-1}\dfrac{g + 1}{g }\phi(X^TX)(x_i^t)^{-1}) (\beta - x_i \dfrac{g}{g + 1}\hat{\beta}_{OLS})}{2}\phi) exp(-\dfrac{\nu_{n}\hat{\sigma^2}}{2}) d\phi $$ -->
+$$ \propto \int \phi^{p/2} \phi^{\nu_{n}/2 -1} exp(-\dfrac{(\beta - x_i\dfrac{g}{g + 1}\hat{\beta}_{OLS})^T (x_i^{-1}\dfrac{g + 1}{g }\phi(X^TX)(x_i^t)^{-1}) (\beta - x_i \dfrac{g}{g + 1}\hat{\beta}_{OLS})}{2}\phi) exp(-\dfrac{\nu_{n}\hat{\sigma^2}}{2}) d\phi $$
 
-<!-- $$ \propto \int \phi^{(p+\nu_{n})/2 -1} exp(-\dfrac{(\beta - x_i \dfrac{g}{g + 1}\hat{\beta}_{OLS})^T (x_i^{-1}\dfrac{g + 1}{g }(X^TX)(x_i^t)^{-1})  (\beta - x_i \dfrac{g}{g + 1}\hat{\beta}_{OLS}) + \nu_{n}\hat{\sigma^2}}{2}\phi) d\phi $$ -->
+$$ \propto \int \phi^{(p+\nu_{n})/2 -1} exp(-\dfrac{(\beta - x_i \dfrac{g}{g + 1}\hat{\beta}_{OLS})^T (x_i^{-1}\dfrac{g + 1}{g }(X^TX)(x_i^t)^{-1})  (\beta - x_i \dfrac{g}{g + 1}\hat{\beta}_{OLS}) + \nu_{n}\hat{\sigma^2}}{2}\phi) d\phi $$
 
-<!-- Again, we recognize this as the kernel of a gamma and we know that it is equal to the reciprocal of its proportional constant: -->
+Again, we recognize this as the kernel of a gamma and we know that it is equal to the reciprocal of its proportional constant:
 
-<!-- $$  = \Gamma(\dfrac{p + \nu_{n}}{2}) \Big[\dfrac{(\beta - x_i \dfrac{g}{g + 1}\hat{\beta}_{OLS})^T (x_i^{-1}\dfrac{g + 1}{g }(X^TX)(x_i^t)^{-1})  (\beta - x_i \dfrac{g}{g + 1}\hat{\beta}_{OLS}) + \nu_{n}\hat{\sigma^2}}{2}\Big]^{-(p + \nu_{n})/2} $$ -->
-<!-- $$ \propto \Big[\dfrac{(\beta - x_i \dfrac{g}{g + 1}\hat{\beta}_{OLS})^T (x_i^{-1}\dfrac{g + 1}{g }(X^TX)(x_i^t)^{-1})  (\beta - x_i \dfrac{g}{g + 1}\hat{\beta}_{OLS}) + \nu_{n}\hat{\sigma^2}}{2}\Big]^{-(p + \nu_{n})/2} $$ -->
+$$  = \Gamma(\dfrac{p + \nu_{n}}{2}) \Big[\dfrac{(\beta - x_i \dfrac{g}{g + 1}\hat{\beta}_{OLS})^T (x_i^{-1}\dfrac{g + 1}{g }(X^TX)(x_i^t)^{-1})  (\beta - x_i \dfrac{g}{g + 1}\hat{\beta}_{OLS}) + \nu_{n}\hat{\sigma^2}}{2}\Big]^{-(p + \nu_{n})/2} $$
+$$ \propto \Big[\dfrac{(\beta - x_i \dfrac{g}{g + 1}\hat{\beta}_{OLS})^T (x_i^{-1}\dfrac{g + 1}{g }(X^TX)(x_i^t)^{-1})  (\beta - x_i \dfrac{g}{g + 1}\hat{\beta}_{OLS}) + \nu_{n}\hat{\sigma^2}}{2}\Big]^{-(p + \nu_{n})/2} $$
 
-<!-- $$ \propto \Big[1 + \dfrac{1}{\nu_{n}}\dfrac{(\beta - x_i\dfrac{g}{g + 1}\hat{\beta}_{OLS})^T (x_i^{-1}\dfrac{g + 1}{g}(X^TX)(x_i^t)^{-1})  (\beta - x_i\dfrac{g}{g + 1}\hat{\beta}_{OLS})}{\hat{\sigma^2}}\Big]^{-(p+\nu_{n})/2} $$ -->
+$$ \propto \Big[1 + \dfrac{1}{\nu_{n}}\dfrac{(\beta - x_i\dfrac{g}{g + 1}\hat{\beta}_{OLS})^T (x_i^{-1}\dfrac{g + 1}{g}(X^TX)(x_i^t)^{-1})  (\beta - x_i\dfrac{g}{g + 1}\hat{\beta}_{OLS})}{\hat{\sigma^2}}\Big]^{-(p+\nu_{n})/2} $$
 
-<!-- c) -->
+c)
 
-<!-- $$ p(Y^{test}| Y, g) = \int p(Y^{test} | Y, g, \phi) p(\phi | Y, g) d\phi $$ -->
+$$ p(Y^{test}| Y, g) = \int p(Y^{test} | Y, g, \phi) p(\phi | Y, g) d\phi $$
 
-<!-- $$ = \int (2\pi)^{-p/2} \begin{vmatrix}\dfrac{1}{\phi} ( \dfrac{1}{n} + x_i\dfrac{g}{g + 1}(X^TX)^{-1}x_i^t + I_n)\end{vmatrix}^{-1/2}  exp(-\dfrac{(Y^{test} - \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta}_{OLS})^T (\dfrac{1}{\phi} ( \dfrac{1}{n} + x_i\dfrac{g}{g + 1}(X^TX)^{-1}x_i^t + I_n))^{-1} (Y^{test} - \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta}_{OLS})}{2}) \dfrac{(\dfrac{\nu_{n}\hat{\sigma^2}}{2})}{\Gamma(\nu_{n}/2)}^{\nu_{n}/2} \phi^{\nu_{n}/2 - 1} exp(-\dfrac{\nu_{n}\hat{\sigma^2}}{2}) d\phi $$ -->
+$$ = \int (2\pi)^{-p/2} \begin{vmatrix}\dfrac{1}{\phi} ( \dfrac{1}{n} + x_i\dfrac{g}{g + 1}(X^TX)^{-1}x_i^t + I_n)\end{vmatrix}^{-1/2}  exp(-\dfrac{(Y^{test} - \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta}_{OLS})^T (\dfrac{1}{\phi} ( \dfrac{1}{n} + x_i\dfrac{g}{g + 1}(X^TX)^{-1}x_i^t + I_n))^{-1} (Y^{test} - \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta}_{OLS})}{2}) \dfrac{(\dfrac{\nu_{n}\hat{\sigma^2}}{2})}{\Gamma(\nu_{n}/2)}^{\nu_{n}/2} \phi^{\nu_{n}/2 - 1} exp(-\dfrac{\nu_{n}\hat{\sigma^2}}{2}) d\phi $$
 
-<!-- $$ \propto \int \phi^{p/2} \phi^{\nu_{n}/2 -1} exp(-\dfrac{(Y^{test} - \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta}_{OLS})^T  ( \dfrac{1}{n} + x_i\dfrac{g}{g + 1}(X^TX)^{-1}x_i^t + I_n)^{-1} (Y^{test} - \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta}_{OLS})}{2}\phi) exp(-\dfrac{\nu_{n}\hat{\sigma^2}}{2}) d\phi $$ -->
+$$ \propto \int \phi^{p/2} \phi^{\nu_{n}/2 -1} exp(-\dfrac{(Y^{test} - \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta}_{OLS})^T  ( \dfrac{1}{n} + x_i\dfrac{g}{g + 1}(X^TX)^{-1}x_i^t + I_n)^{-1} (Y^{test} - \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta}_{OLS})}{2}\phi) exp(-\dfrac{\nu_{n}\hat{\sigma^2}}{2}) d\phi $$
 
-<!-- $$ \propto \int \phi^{(p+\nu_{n})/2 -1} exp(-\dfrac{(Y^{test} - \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta}_{OLS})^T  ( \dfrac{1}{n} + x_i\dfrac{g}{g + 1}(X^TX)^{-1}x_i^t + I_n)^{-1} (Y^{test} - \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta}_{OLS}) + \nu_{n}\hat{\sigma^2} }{2}\phi) d\phi $$ -->
+$$ \propto \int \phi^{(p+\nu_{n})/2 -1} exp(-\dfrac{(Y^{test} - \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta}_{OLS})^T  ( \dfrac{1}{n} + x_i\dfrac{g}{g + 1}(X^TX)^{-1}x_i^t + I_n)^{-1} (Y^{test} - \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta}_{OLS}) + \nu_{n}\hat{\sigma^2} }{2}\phi) d\phi $$
 
-<!-- As in the previous two derivations, we know this is equal to the reciprocal of the proportional constant of the gamma: -->
+As in the previous two derivations, we know this is equal to the reciprocal of the proportional constant of the gamma:
 
-<!-- $$  = \Gamma(\dfrac{p + \nu_{n}}{2}) \Big[\dfrac{(Y^{test} - \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta}_{OLS})^T  ( \dfrac{1}{n} + x_i\dfrac{g}{g + 1}(X^TX)^{-1}x_i^t + I_n)^{-1} (Y^{test} - \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta}_{OLS}) + \nu_{n}\hat{\sigma^2} }{2}\Big]^{-(p + \nu_{n})/2} $$ -->
+$$  = \Gamma(\dfrac{p + \nu_{n}}{2}) \Big[\dfrac{(Y^{test} - \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta}_{OLS})^T  ( \dfrac{1}{n} + x_i\dfrac{g}{g + 1}(X^TX)^{-1}x_i^t + I_n)^{-1} (Y^{test} - \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta}_{OLS}) + \nu_{n}\hat{\sigma^2} }{2}\Big]^{-(p + \nu_{n})/2} $$
 
-<!-- $$  \propto \Big[\dfrac{(Y^{test} - \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta}_{OLS})^T  ( \dfrac{1}{n} + x_i\dfrac{g}{g + 1}(X^TX)^{-1}x_i^t + I_n)^{-1} (Y^{test} - \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta}_{OLS}) + \nu_{n}\hat{\sigma^2}}{2}\Big]^{-(p + \nu_{n})/2} $$ -->
+$$  \propto \Big[\dfrac{(Y^{test} - \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta}_{OLS})^T  ( \dfrac{1}{n} + x_i\dfrac{g}{g + 1}(X^TX)^{-1}x_i^t + I_n)^{-1} (Y^{test} - \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta}_{OLS}) + \nu_{n}\hat{\sigma^2}}{2}\Big]^{-(p + \nu_{n})/2} $$
 
-<!-- $$  \propto \Big[1 + \dfrac{1}{\nu_{n}} \dfrac{(Y^{test} - \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta}_{OLS})^T  ( \dfrac{1}{n} + x_i\dfrac{g}{g + 1}(X^TX)^{-1}x_i^t + I_n)^{-1} (Y^{test} - \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta}_{OLS})}{\hat{\sigma^2}}\Big]^{-(p + \nu_{n})/2} $$ -->
-<!-- Again, this is proportional to a student-T with $\nu_{n}$ degrees of freedom. -->
+$$  \propto \Big[1 + \dfrac{1}{\nu_{n}} \dfrac{(Y^{test} - \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta}_{OLS})^T  ( \dfrac{1}{n} + x_i\dfrac{g}{g + 1}(X^TX)^{-1}x_i^t + I_n)^{-1} (Y^{test} - \bar{Y} + x_i \dfrac{g}{1 + g}\hat{\beta}_{OLS})}{\hat{\sigma^2}}\Big]^{-(p + \nu_{n})/2} $$
+Again, this is proportional to a student-T with $\nu_{n}$ degrees of freedom.
 
-<!-- 9. Let $\tau = 1/g$ and substitute that in the prior for $\beta$ -->
-<!-- $$\beta \mid \beta_0, \phi \sim N(0, (X^TX)^{-1}/(\tau \phi))$$ -->
-<!-- If $\tau \sim G(1/2, n/2)$, show that the prior on $\beta$ is a Cauchy Distribution  -->
-<!-- $$\beta \mid  \phi, \beta_0 \sim C(0,  (X^TX/n)^{-1}/\phi)$$ -->
-<!-- _(a Cauchy distribution is a Student t with 1 df - see notes for density)_ -->
+9. Let $\tau = 1/g$ and substitute that in the prior for $\beta$
+$$\beta \mid \beta_0, \phi \sim N(0, (X^TX)^{-1}/(\tau \phi))$$
+If $\tau \sim G(1/2, n/2)$, show that the prior on $\beta$ is a Cauchy Distribution
+$$\beta \mid  \phi, \beta_0 \sim C(0,  (X^TX/n)^{-1}/\phi)$$
+_(a Cauchy distribution is a Student t with 1 df - see notes for density)_
 
-<!-- ANSWER: -->
+ANSWER:
 
-<!-- $$p(\beta | \beta_{0}, \phi) = \int p(\beta | \beta_{0}, \phi, g)p(\tau | \phi, \beta_{0})p(\phi, \beta_{0}) d\tau $$ -->
+$$p(\beta | \beta_{0}, \phi) = \int p(\beta | \beta_{0}, \phi, g)p(\tau | \phi, \beta_{0})p(\phi, \beta_{0}) d\tau $$
 
-<!-- Since $\tau$ does not depend on $\phi$ or $\beta_{0}$, we can use the given unconditional distribution for $\tau$. Plugging in the distributions, we get: -->
+Since $\tau$ does not depend on $\phi$ or $\beta_{0}$, we can use the given unconditional distribution for $\tau$. Plugging in the distributions, we get:
 
-<!-- $$ = \int (2\pi)^{-p/2} \begin{vmatrix}\dfrac{(X^TX)^{-1}}{\tau \phi}\end{vmatrix}^{-1/2} exp(-\dfrac{\beta^T(\dfrac{(X^TX)}{\tau\phi})^{-1}\beta}{2})  \dfrac{\dfrac{n}{2}^{1/2}}{\Gamma(\dfrac{1}{2})} \tau^{1/2 - 1} exp(-\dfrac{n}{2}\tau) \dfrac{1}{\phi} d\tau $$ -->
+$$ = \int (2\pi)^{-p/2} \begin{vmatrix}\dfrac{(X^TX)^{-1}}{\tau \phi}\end{vmatrix}^{-1/2} exp(-\dfrac{\beta^T(\dfrac{(X^TX)}{\tau\phi})^{-1}\beta}{2})  \dfrac{\dfrac{n}{2}^{1/2}}{\Gamma(\dfrac{1}{2})} \tau^{1/2 - 1} exp(-\dfrac{n}{2}\tau) \dfrac{1}{\phi} d\tau $$
 
-<!-- Grouping terms, we get: -->
+Grouping terms, we get:
 
-<!-- $$ \propto \int \tau^{(p + 1)/2 - 1} exp(-\dfrac{(n +(\beta^T\phi(X^TX)\beta))}{2} \tau) d\tau $$ -->
+$$ \propto \int \tau^{(p + 1)/2 - 1} exp(-\dfrac{(n +(\beta^T\phi(X^TX)\beta))}{2} \tau) d\tau $$
 
-<!-- It is easy to see that this is the kernel of a Gamma distribution with $a = \dfrac{n + 1}{2}$ and $b = \dfrac{n + (\beta^T\phi(X^TX)\beta)}{2} $ . For this expression to be equal to 1, the proportional constant would need to be $ \dfrac{(\dfrac{n + (\beta^T\phi(X^TX)\beta)}{2})^{(n+1)/2}}{\Gamma(\dfrac{n + 1}{2})} $. It can be shown that the reciprocal of this proportional constant is what the above proportion is equal to. In mathematical terms: -->
+It is easy to see that this is the kernel of a Gamma distribution with $a = \dfrac{n + 1}{2}$ and $b = \dfrac{n + (\beta^T\phi(X^T X)\beta)}{2}$ . For this expression to be equal to 1, the proportional constant would need to be $\dfrac{(\dfrac{n + (\beta^T\phi(X^TX)\beta)}{2})^{(n+1)/2}}{\Gamma(\dfrac{n + 1}{2})}$. It can be shown that the reciprocal of this proportional constant is what the above proportion is equal to. In mathematical terms:
 
-<!-- $$ = \Gamma(\dfrac{p + 1}{2}) \Big[(\dfrac{n +(\beta^T\phi(X^TX)\beta)}{2})^{-(p+1)/2}\Big] \propto (n +(\beta^T\phi(X^TX)\beta))^{-(p+1)/2} $$ -->
-<!-- $$ \propto \Big[1 + \dfrac{\beta^T\phi(X^TX)\beta}{n}\Big]^{-(p+1)/2}$$ -->
+$$ = \Gamma(\dfrac{p + 1}{2}) \Big[(\dfrac{n +(\beta^T\phi(X^TX)\beta)}{2})^{-(p+1)/2}\Big] \propto (n +(\beta^T\phi(X^TX)\beta))^{-(p+1)/2} $$
+$$ \propto \Big[1 + \dfrac{\beta^T\phi(X^TX)\beta}{n}\Big]^{-(p+1)/2}$$
 
-<!-- So, the prior on $\beta$ is proportional to a student-T with one degree of freedom, which is also a Cauchy distribution. -->
+So, the prior on $\beta$ is proportional to a student-T with one degree of freedom, which is also a Cauchy distribution.
 
 
 
