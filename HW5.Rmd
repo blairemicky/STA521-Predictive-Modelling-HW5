@@ -293,6 +293,7 @@ p3<-ggplot(data = rmse_df_aic[3], aes(x = rmse_df_aic[3])) +
 
 multiplot(p1, p2, p3, cols=3)
 
+propto.aic = count_true/100
 
 ```
 The number of "correct" models is `count_true`. The average RMSE for $\beta^{true}$, $\mu^{true}$ and out of sample prediction are `r avg_rmse_aic[1]`, `r avg_rmse_aic[2]`, and `r avg_rmse_aic[3]`, respectively. The full distributions are found in the plots above.
@@ -390,6 +391,8 @@ p3<-ggplot(data = rmse_df_bic[3], aes(x = rmse_df_bic[3])) +
   geom_vline(xintercept = avg_rmse_test, color = "darkblue")+ labs(x = "RSME: Test prediction", y = "Count")
 
 multiplot(p1,p2,p3, cols = 3)
+
+propto.bic = count_true/100
 
 ```
 The number of "correct" models is `count_true`. The average RMSE for $\beta^{true}$, $\mu^{true}$ and out of sample prediction are `r avg_rmse_bic[1]`, `r avg_rmse_bic[2]`, and `r avg_rmse_bic[3]`, respectively.
@@ -627,6 +630,9 @@ RMSE_BPM = data.frame(beta = RMSE_beta_BPM, mu = RMSE_mu_BPM, test = RMSE_test_B
 avg.rmse.bpm = apply(RMSE_BMA, 2, mean)
 #diagnostic plots for MCMC convergence
 #diagnostics(app_best, type="pip")
+
+propto.hpm = count_true_hpm/100
+propto.bpm = count_true_bpm/100
 ```
 
 
@@ -888,6 +894,9 @@ avg.rmse.zs.bma = apply(RMSE_BMA, 2, mean)
 
 RMSE_BPM = data.frame(beta = RMSE_beta_BPM, mu = RMSE_mu_BPM, test = RMSE_test_BPM)
 avg.rmse.zs.bpm = apply(RMSE_BMA, 2, mean)
+
+propto.zs.hpm = count_true_hpm/100
+propto.zs.bpm = count_true_bpm/100
 ```
 
 ```{r, Prob14.2, echo=FALSE, cache=TRUE}
@@ -1029,8 +1038,10 @@ methods = rbind(OLS = avg.rmse.df, AIC = avg_rmse_aic, BIC = avg_rmse_bic, HPM.M
 kable(methods, row.names = TRUE, caption = "Average RMSE's by Method")
 
 #Create columns for proportion true
+proportions = rbind(AIC = propto.aic, BIC = propto.bic, HPM = propto.hpm, BPM = propto.bpm, ZS.HPM = propto.hpm, ZS.BPM = propto.bpm)
 
 #Create table for proportion true across methods
+kable(proportions, col.names = "Proportion", row.names = TRUE, caption = "Proportion of Time True Model Selected")
 ```
 
 
