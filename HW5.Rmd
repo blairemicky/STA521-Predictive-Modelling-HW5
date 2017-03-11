@@ -399,6 +399,9 @@ p3<-ggplot(data = rmse_df_bic[3], aes(x = rmse_df_bic[3])) +
 
 multiplot(p1,p2,p3, cols = 3)
 
+# count of number of times true is selected
+print(count_true)
+
 propto.bic = count_true/100
 
 ```
@@ -442,7 +445,10 @@ $$
 and the improper independent Jeffrey's prior $$p(\beta_0, \phi) \propto 1/\phi$$
 find the a) posterior distriubtion of $\beta \mid Y, g, \phi$, b) posterior distribution of $\mu_i = x^T_i \beta \mid Y, g, \phi$ and c) the posterior predictive distribution of $Y^{test} \mid Y, g, \phi$ as functions of the OLS/MLE summaries. _(you may use results in notes - just quote - or derive)_
 
-ANSWER: a) a) For a short answer, we reference the class notes which provide the posterior  $$ \beta | Y, \phi, g \sim \mathcal{N}\left(\frac{g}{1+g}\hat{\beta},  \frac{g}{1+g}(X^tX)^{-1}\phi^{-1}\right),$$ and $$\beta_0 \, | \, Y, \phi \sim \mathcal{N}(\bar{Y}, I_n/n\phi).$$
+ANSWER: 
+While we provide short answers here to #7, #8, and #9, full derivations of each problem are shown at the bottom of the document in the Appendix.
+
+a) For a short answer, we reference the class notes which provide the posterior  $$ \beta | Y, \phi, g \sim \mathcal{N}\left(\frac{g}{1+g}\hat{\beta},  \frac{g}{1+g}(X^tX)^{-1}\phi^{-1}\right),$$ and $$\beta_0 \, | \, Y, \phi \sim \mathcal{N}(\bar{Y}, I_n/n\phi).$$
 
 b) We note that technically $\mu_i = \beta_0 + x_i^t \beta$, but here we are asked to consider only the second term, $$\mu_i = x_{i}^t\beta | Y, g, \phi. $$ This is an affine transformation of a Gaussian, and hence by standard results (see, e.g.,  the book by Christensen on linear models), we know that $\mu_i$ is normally distributed as : $$ \mu_{i}\sim \mathcal{N}\left( x_i \dfrac{g}{1+g}\hat{\beta}, \phi^{-1}\dfrac{g}{1+g}x_i (X^TX)^{-1} x_i^t  \right).$$
 
