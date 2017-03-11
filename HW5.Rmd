@@ -976,7 +976,7 @@ b3<-ggplot(data = RMSE[3], aes(x = RMSE[3])) +
   geom_histogram(fill = "salmon", color = "orangered3")+
   geom_vline(xintercept = mean(RMSE[,3]), color = "darkblue")+ labs(title="BMA: RMSE for test prediction ", x="RMSE", y="Count")
 
-multiplot(b1,b2,b3,cols = 2)
+multiplot(b1,b2,b3,cols = 3)
 
 ## confint
 
