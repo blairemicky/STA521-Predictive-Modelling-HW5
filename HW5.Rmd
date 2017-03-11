@@ -829,7 +829,6 @@ RMSE_mu_BPM  = rep(0,100)
 RMSE_test_BPM  = rep(0,100)
 
 for(i in 1:100){
-  print(i)
   rm(df)
   load(fname[i])
   # Use BAS for model sampling (method=MCMC for speed; method=BAS for enumeration)
@@ -937,7 +936,7 @@ g3<-ggplot(data = RMSE[3], aes(x = RMSE[3])) +
 multiplot(g1,g2,g3,cols = 2) 
 ```
 
-```{r, Prob14.3, echo=TRUE}
+```{r, Prob14.3, echo=FALSE}
 ####  FOR 11
 rm(df) 
 load(fname[12])
@@ -1047,7 +1046,7 @@ ggplot(MCT, aes(x=names(betatrue), y=mean),show.legend = TRUE) +
 Does any one method seem to do better than the others or are some methods better for one estimation/prediction problem than the others?  Explain.
 For the energetic team - what about coverage?
 
-```{r}
+```{r, echo=FALSE}
 #Create columns for each set of beta, mu, and test RMSE
 methods = rbind(OLS = avg.rmse.df, AIC = avg_rmse_aic, BIC = avg_rmse_bic, HPM.MCMC = avg.rmse.hpm, BMA.MCMC = avg.rmse.bma, BPM.MCMC = avg.rmse.bpm, HPM.ZS = avg.rmse.zs.hpm, BMA.ZS = avg.rmse.zs.bma, BPM.ZS = avg.rmse.zs.bpm)
 
