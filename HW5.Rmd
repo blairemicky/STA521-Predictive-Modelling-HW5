@@ -198,7 +198,7 @@ avg.rmse.test = mean(RMSE.test.pred)
 avg.rmse.df = data.frame(beta = avg.rmse.beta, mu = avg.rmse.mu, test = avg.rmse.test)
 
 #Table for average RMSE's
-#kable(avg.rmse.df, caption = "Average RMSE's")
+kable(avg.rmse.df, caption = "Average RMSE's")
 
 #store RSME's in data frame
 rmse.df = data.frame(RMSE.beta, RMSE.mu, RMSE.test.pred)
@@ -295,6 +295,8 @@ p3<-ggplot(data = rmse_df_aic[3], aes(x = rmse_df_aic[3])) +
 
 multiplot(p1, p2, p3, cols=3)
 
+# number of times true model selected
+print(count_true)
 propto.aic = count_true/100
 
 ```
