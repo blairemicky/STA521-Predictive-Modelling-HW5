@@ -677,7 +677,7 @@ multiplot(g1,g2,g3,cols = 3)
 
 The number of times the "correct" model is selected is `r count_true_hpm`. The mean RMSEs for $\beta^{true}$, $\mu^{true}$ and $Y^{pred}$ were `r mean(RMSE_beta_HPM)`, `r mean(RMSE_mu_HPM)` and `r mean(RMSE_test_HPM)`, respectively. Since we used MCMC, we checked the 'pip' plots for several datasets. We found them to be satisfatory, see below for the diagnostics of the last data set.
 
-```{r}
+```{r, echo=FALSE}
 #diagnostic plots for MCMC convergence
 diagnostics(app_best, type="pip")
 
@@ -757,7 +757,7 @@ From The figure we see that the true values of all coefficeint are contained in 
 
 13.  If we wanted to select the model that is "closest" to BMA,  we could use the model whose predictions are closest to BMA  using squared error loss.  We can find the best predictive model `BPM` from `BAS` using the predict function with `estimator="BPM"`.   Repeat 10 and 11 using the Best Predictive Model, `BPM`.
 
-```{r, 13_output, echo=FALSE, cache=TRUE}
+```{r, 13_output, echo=FALSE, cache=TRUE, warning=FALSE, message=FALSE}
 RMSE<-RMSE_BPM
 
 #beta
@@ -794,12 +794,13 @@ ggplot(MCT, aes(x=names(betatrue), y=mean),show.legend = TRUE) +
   geom_point()+geom_point(aes(y=truth),color="red")+labs(title="Posterior Confidence Intervals for BPM (black=estimate, red=truth)", x="Coefficients", y="Value")
 
 ```
+
 Qualitatively the conclusions to draw here are exactly as in Problem 11.
 
 
 14.  Are the Bayesian estimates sensitive to the choice of prior?  Try 10-13 using the Zellner-Siow Cauchy prior (option `prior = "ZS-null"` in `bas.lm`)  
 
-```{r, Prob14.1, echo=FALSE, cache=TRUE}
+```{r, Prob14.1, echo=FALSE, cache=TRUE, warning=FALSE, message=FALSE}
 
 ##############################
 ## Bulk code for 10-12
@@ -915,7 +916,7 @@ propto.zs.hpm = count_true_hpm/100
 propto.zs.bpm = count_true_bpm/100
 ```
 
-```{r, Prob14.2, echo=FALSE, cache=TRUE}
+```{r, Prob14.2, echo=FALSE, cache=FALSE}
 ### OUTPUT FOR 10
 
 RMSE<-RMSE_HPM
@@ -933,7 +934,7 @@ g3<-ggplot(data = RMSE[3], aes(x = RMSE[3])) +
   geom_histogram(fill = "salmon", color = "orangered3")+
   geom_vline(xintercept = mean(RMSE[,3]), color = "darkblue")+ labs(title="HPM: RMSE for prediction", x="RMSE", y="Count")
 
-multiplot(g1,g2,g3,cols = 2) 
+multiplot(g1,g2,g3,cols = 3) 
 ```
 
 ```{r, Prob14.3, echo=FALSE}
@@ -958,7 +959,7 @@ ggplot(MCT, aes(x=names(betatrue), y=mean),show.legend = TRUE) +
 
 ```
 
-```{r, Prob14.4, echo=FALSE, cache=TRUE}
+```{r, Prob14.4, echo=FALSE, cache=FALSE}
 # For Question 12
 RMSE<-RMSE_BMA
 
@@ -1002,7 +1003,7 @@ ggplot(MCT, aes(x=names(betatrue), y=post.mean),show.legend = TRUE) +
 ```
 
 
-```{r, Prob14.5, echo=FALSE, cache=TRUE}
+```{r, Prob14.5, echo=FALSE, cache=FALSE}
 
 RMSE<-RMSE_BPM
 
