@@ -826,7 +826,7 @@ for(i in 1:100){
   rm(df)
   load(fname[i])
   # Use BAS for model sampling (method=MCMC for speed; method=BAS for enumeration)
-  bas.lm(Y ~.-mu, data=df[1:50,],
+  app_best<-bas.lm(Y ~.-mu, data=df[1:50,],
                     prior="ZS-null", a=nrow(df[1:50,]), modelprior=uniform(),
                     method="MCMC", MCMC.iterations = 200000, thin = 20,
                     initprobs="marg-eplogp")
