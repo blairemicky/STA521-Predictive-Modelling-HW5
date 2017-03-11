@@ -941,7 +941,7 @@ multiplot(g1,g2,g3,cols = 2)
 rm(df) 
 load(fname[12])
 # Use BAS for model sampling (method=MCMC for speed; method=BAS for enumeration)
-  bas.lm(Y ~.-mu, data=df[1:50,],
+  app_best<-bas.lm(Y ~.-mu, data=df[1:50,],
                     prior="ZS-null", a=nrow(df[1:50,]), modelprior=uniform(),
                     method="MCMC", MCMC.iterations = 200000, thin = 20,
                     initprobs="marg-eplogp")
@@ -1026,7 +1026,7 @@ multiplot(q1,q2,q3,cols=3)
 rm(df) 
 load(fname[12])
 # Use BAS for model sampling (method=MCMC for speed; method=BAS for enumeration)
-bas.lm(Y ~.-mu, data=df[1:50,],
+app_best<-bas.lm(Y ~.-mu, data=df[1:50,],
                     prior="ZS-null", a=nrow(df[1:50,]), modelprior=uniform(),
                     method="MCMC", MCMC.iterations = 200000, thin = 20,
                     initprobs="marg-eplogp")
