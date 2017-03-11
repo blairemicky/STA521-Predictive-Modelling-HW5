@@ -1064,7 +1064,7 @@ kable(proportions, col.names = "Proportion", row.names = TRUE, caption = "Propor
 
 
 
-## Appendix: Doing the a
+## Appendix: Doing the full calculations for problems 7, 8 and 9
 
 7. Theory (work individually and then combine to add group solution, try to complete by Wednesday before class)
 For the linear model, assume that the $X$ have been centered so that they all have mean 0.  For the linear model
