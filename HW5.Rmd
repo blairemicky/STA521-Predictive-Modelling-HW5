@@ -645,7 +645,7 @@ RMSE_BMA = data.frame(beta = RMSE_beta_BMA, mu = RMSE_mu_BMA, test = RMSE_test_B
 avg.rmse.bma = apply(RMSE_BMA, 2, mean)
 
 RMSE_BPM = data.frame(beta = RMSE_beta_BPM, mu = RMSE_mu_BPM, test = RMSE_test_BPM)
-avg.rmse.bpm = apply(RMSE_BMA, 2, mean)
+avg.rmse.bpm = apply(RMSE_BPM, 2, mean)
 
 
 propto.hpm = count_true_hpm/100
@@ -910,7 +910,7 @@ RMSE_BMA = data.frame(beta = RMSE_beta_BMA, mu = RMSE_mu_BMA, test = RMSE_test_B
 avg.rmse.zs.bma = apply(RMSE_BMA, 2, mean)
 
 RMSE_BPM = data.frame(beta = RMSE_beta_BPM, mu = RMSE_mu_BPM, test = RMSE_test_BPM)
-avg.rmse.zs.bpm = apply(RMSE_BMA, 2, mean)
+avg.rmse.zs.bpm = apply(RMSE_BPM, 2, mean)
 
 propto.zs.hpm = count_true_hpm/100
 propto.zs.bpm = count_true_bpm/100
